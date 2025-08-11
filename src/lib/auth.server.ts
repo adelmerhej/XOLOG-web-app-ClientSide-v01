@@ -1,6 +1,6 @@
 import { AuthOptions, User as NextAuthUser } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { connectToDatabase } from './db.server';
+//import { connectToDatabase } from './dbUtils';
 import { UserModel } from '@/models/UserModel';
 import bcrypt from 'bcryptjs';
 
@@ -16,7 +16,7 @@ export const authOptions: AuthOptions = {
 			},
 			async authorize(credentials) {
 				if (!credentials?.username || !credentials.password) return null;
-				await connectToDatabase();
+				//await connectToDatabase();
 				const user = await UserModel.findOne({ username: credentials.username });
 				if (!user) return null;
 				const valid = await bcrypt.compare(credentials.password, user.password);

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db.server';
+//import { connectToDatabase } from '@/lib/dbUtils';
 import { UserModel } from '@/models/UserModel';
 
 export async function POST(req: Request) {
@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     if (!username || !email || !password) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
-    await connectToDatabase();
+    //await connectToDatabase();
     const exists = await UserModel.findOne({ $or: [{ username }, { email }] });
     if (exists) {
       return NextResponse.json({ error: 'User already exists' }, { status: 409 });

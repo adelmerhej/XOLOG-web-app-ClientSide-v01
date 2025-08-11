@@ -89,12 +89,6 @@ const UserSchema: Schema<IUser> = new Schema(
     timestamps: true,
   }
 );
-// Add indexes for better performance
-UserSchema.index({ username: 1 });
-UserSchema.index({ email: 1 });
-// Add a compound index for username and email
-UserSchema.index({ username: 1, email: 1 }, { unique: true });
-UserSchema.index({ username: 'text', email: 'text' });
 
 // 🔑 Password field should not be returned in queries
 // Prevent returning resetToken in queries
