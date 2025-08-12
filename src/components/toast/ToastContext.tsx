@@ -1,6 +1,31 @@
 "use client";
 import React, { createContext, useContext, useCallback, useState, useRef, useEffect } from 'react';
 
+// Fallback UUID generator if crypto.randomUUID is unavailable (older browsers / non-secure contexts)
+function generateUUID(): string {
+  // Use native if present
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto && typeof (crypto as { randomUUID?: () => string }).randomUUID === 'function') {
+    try { return (crypto as { randomUUID: () => string }).randomUUID(); } catch { /* ignore */ }
+  }
+  // Use getRandomValues if available
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    // Per RFC4122 v4 adjustments
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const toHex = (n: number) => n.toString(16).padStart(2, '0');
+    const hex = Array.from(bytes, toHex).join('');
+    return `${hex.substring(0,8)}-${hex.substring(8,12)}-${hex.substring(12,16)}-${hex.substring(16,20)}-${hex.substring(20)}`;
+  }
+  // Last resort (not cryptographically strong)
+  return 'xxxxxxxxyxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  }) + Date.now().toString(16);
+}
+
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 export interface ToastOptions {
   id?: string;
@@ -39,7 +64,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [dismiss]);
 
   const push = useCallback((opts: ToastOptions) => {
-    const id = opts.id || crypto.randomUUID();
+    const id = opts.id || generateUUID();
     const toast: Toast = {
       id,
       type: opts.type || 'info',
