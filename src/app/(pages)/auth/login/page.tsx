@@ -1,34 +1,65 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import 'devextreme/dist/css/dx.light.css';
 import { Button } from 'devextreme-react/button';
+import { useToast } from '@/components/toast/ToastContext';
 import { TextBox } from 'devextreme-react/text-box';
 
-export default function Login() {
+function LoginInner() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const [identifier, setIdentifier] = useState(''); // username or email
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { push } = useToast();
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    const res = await signIn('credentials', {
-      username,
-      password,
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.error) {
-      setError('Invalid credentials');
-    } else {
-  router.push('/dashboard');
+  const identifierValid = useMemo(() => {
+    const v = identifier.trim();
+    if (v.includes('@')) {
+      // basic email check
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+    return v.length >= 3; // username rule
+  }, [identifier]);
+  const passwordValid = useMemo(() => password.length >= 6, [password]);
+  const formValid = identifierValid && passwordValid;
+
+  async function handleSubmit(e?: { preventDefault?: () => void }) {
+    e?.preventDefault?.();
+    if (!formValid) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await signIn('credentials', {
+        identifier: identifier.trim(),
+        password,
+        redirect: false,
+        callbackUrl,
+      });
+      if (!res) {
+        setError('Unexpected error: no response');
+        push({ type: 'error', title: 'Login Failed', description: 'Unexpected: no response from server.' });
+      } else if (res.error) {
+        let msg = 'Invalid credentials';
+        if (res.error.toLowerCase().includes('no user')) msg = 'User not found';
+        else if (res.error.toLowerCase().includes('password')) msg = 'Incorrect password';
+        setError(msg);
+        push({ type: 'error', title: 'Login Failed', description: msg });
+      } else {
+        push({ type: 'success', title: 'Welcome', description: 'Login successful.' });
+        router.push(res.url || callbackUrl);
+      }
+  } catch {
+      setError('Login failed');
+      push({ type: 'error', title: 'Login Failed', description: 'Network or server issue.' });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -58,29 +89,42 @@ export default function Login() {
         </div>
       </div>
       <div className="flex-1 flex items-center justify-center p-8">
-        <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
+  <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
           <div>
             <h2 className="text-3xl font-bold mb-2 text-sky-600 dark:text-sky-300">Sign In</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">Use your XOLOG account credentials</p>
           </div>
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold mb-1 uppercase tracking-wide">Username</label>
-              <TextBox value={username} onValueChanged={(e) => setUsername(e.value)} placeholder="Enter username" />
+              <label className="block text-xs font-semibold mb-1 uppercase tracking-wide">Username or Email</label>
+              <TextBox value={identifier} onValueChanged={(e) => setIdentifier(e.value)} placeholder="Enter username or email" />
+              {!identifierValid && identifier.length > 0 && (
+                <div className="mt-1 text-[11px] text-red-600 dark:text-red-400">Enter valid email or at least 3 character username.</div>
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1 uppercase tracking-wide">Password</label>
               <TextBox mode="password" value={password} onValueChanged={(e) => setPassword(e.value)} placeholder="Enter password" />
+              {!passwordValid && password.length > 0 && (
+                <div className="mt-1 text-[11px] text-red-600 dark:text-red-400">Minimum 6 characters.</div>
+              )}
             </div>
           </div>
-          {error && <div className="text-sm text-red-600 dark:text-red-400">{error}</div>}
+          {error && <div className="sr-only" role="alert">{error}</div>}
           <Button
-            type="submit"
+            type="button"
             text={loading ? 'Signing in...' : 'Sign In'}
             stylingMode="contained"
-            disabled={loading}
+            disabled={loading || !formValid}
+            // DevExtreme ClickEvent => call handler without needing event typing
+            onClick={() => { void handleSubmit(); }}
             className="w-full bg-sky-600 hover:bg-sky-700 text-white"
           />
+          {/* Hidden native submit button for accessibility / Enter key */}
+          <button type="submit" className="hidden" aria-hidden="true" />
+          {!formValid && (
+            <div className="text-[11px] text-slate-500 dark:text-slate-400 text-center">Fill required fields correctly to enable sign in.</div>
+          )}
           <p className="text-xs text-center text-slate-500 dark:text-slate-400">
             No account?{' '}
             <Link href="/auth/register" className="text-sky-600 dark:text-sky-400 font-medium hover:underline">
@@ -90,5 +134,13 @@ export default function Login() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-500 dark:text-slate-400">Loading...</div>}>
+      <LoginInner />
+    </Suspense>
   );
 }

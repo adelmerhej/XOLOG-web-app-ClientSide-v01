@@ -35,20 +35,14 @@ const UserSchema: Schema<IUser> = new Schema(
     password: {
       type: String,
       required: [true, "password is required"],
-      validate: {
-        validator: function (v: string) {
-          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
-            v
-          );
-        },
-        message:
-          "Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character",
-      },
+  minlength: [6, 'Password must be at least 6 characters'],
+  select: false, // hide by default; must be explicitly selected
     },
     email: {
       type: String,
       unique: true,
       required: [true, "Email is required"],
+  lowercase: true,
       match: [
         /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
         "Please provide a valid email address",
@@ -87,6 +81,7 @@ const UserSchema: Schema<IUser> = new Schema(
   },
   {
     timestamps: true,
+    collection: "users",
   }
 );
 
@@ -133,4 +128,12 @@ export const getUsers = async () => {
 
 export const getUserByUsername = async (username: string) => {
   return await UserModel.findOne({ username }).select('-password -resetToken');
+};
+
+// New: fetch by username OR email (case-insensitive for email)
+export const getUserByIdentifier = async (identifier: string) => {
+  const query = identifier.includes('@')
+    ? { email: identifier.toLowerCase() }
+    : { username: identifier };
+  return await UserModel.findOne(query).select('-password -resetToken');
 };

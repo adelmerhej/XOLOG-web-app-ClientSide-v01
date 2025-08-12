@@ -35,7 +35,7 @@ export const authOptions: AuthOptions = {
 		},
 		async session({ session, token }) {
 			if (session.user) {
-			(session.user as NextAuthUser & { role?: string }).role = token.role as string | undefined;
+			(session.user as unknown as NextAuthUser & { role?: string }).role = token.role as string | undefined;
 			}
 			return session;
 		},

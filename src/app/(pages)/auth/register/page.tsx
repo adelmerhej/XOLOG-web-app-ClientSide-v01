@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import 'devextreme/dist/css/dx.light.css';
 import { Button } from 'devextreme-react/button';
+import { useToast } from '@/components/toast/ToastContext';
 import { TextBox } from 'devextreme-react/text-box';
 
 export default function Register() {
@@ -12,6 +13,7 @@ export default function Register() {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { push } = useToast();
 
   function update<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -27,10 +29,19 @@ export default function Register() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error(await res.text());
-  router.push('/auth/login');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = data?.error || 'Registration failed1';
+        setError(msg);
+        push({ type: 'error', title: 'Registration Failed2', description: msg });
+        return;
+      }
+      push({ type: 'success', title: 'Account Created', description: 'You can now sign in.' });
+      router.push('/auth/login');
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message); else setError('Registration failed');
+      const msg = err instanceof Error ? err.message : 'Registration failed3';
+      setError(msg);
+      push({ type: 'error', title: 'Registration Failed4', description: msg });
     } finally {
       setLoading(false);
     }
@@ -64,15 +75,20 @@ export default function Register() {
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1 uppercase tracking-wide">Password</label>
-              <TextBox mode="password" value={form.password} onValueChanged={(e) => update('password', e.value)} placeholder="Strong password" />
+              <TextBox mode="password" value={form.password} onValueChanged={(e) => update('password', e.value)} placeholder="At least 6 characters" />
+              {form.password.length > 0 && form.password.length < 6 && (
+                <div className="mt-1 text-[11px] text-red-600 dark:text-red-400">Minimum 6 characters.</div>
+              )}
             </div>
           </div>
-          {error && <div className="text-sm text-red-600 dark:text-red-400">{error}</div>}
+          {error && <div className="sr-only" role="alert">{error}</div>}
           <Button
-            type="submit"
+            type="button"
             text={loading ? 'Creating...' : 'Create Account'}
             stylingMode="contained"
             disabled={loading}
+            // DevExtreme ClickEvent => call handler without needing event typing
+            onClick={() => { void handleSubmit({ preventDefault: () => {} } as React.FormEvent); }}
             className="w-full bg-sky-600 hover:bg-sky-700 text-white"
           />
           <p className="text-xs text-center text-slate-500 dark:text-slate-400">
