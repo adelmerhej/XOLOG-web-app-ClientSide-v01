@@ -22,7 +22,7 @@ const nav: NavSection[] = [
 		title: 'Reports',
 		items: [
 			{ label: 'To Be Loaded', href: '/reports/to-be-loaded' },
-			{ label: 'On Water', href: '/on-water' },
+			{ label: 'On Water', href: '/reports/on-water' },
 			{ label: 'Under Clearance', href: '/reports/under-clearance' },
 			{ label: 'Invoice Status', href: '/reports/invoice-status' },
 		],
