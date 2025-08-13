@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { signIn } from '@/app/api/auth';
 
-const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/admin/reports`;
+const baseUrl = `http://myaccount.xolog.com:5055/api/v1/admin/reports`;
 
 const getData = async(queryString?: string, token?: string) => {
 
@@ -15,6 +15,9 @@ const getData = async(queryString?: string, token?: string) => {
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
+
+    console.log('Fetching ongoing jobs with query:',
+      `${process.env.REACT_APP_API_URL}/api/v1/admin/reports`);
 
     const response = await fetch(`${baseUrl}/ongoing-jobs${queryString ? `?${queryString}` : ''}`, {
       method: 'GET',
