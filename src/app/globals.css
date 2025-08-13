@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Global utility styles */
+.spinning-icon-button .dx-icon.dx-icon-refresh {
+  animation: dx-spin 1s linear infinite;
+}
+
+@keyframes dx-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

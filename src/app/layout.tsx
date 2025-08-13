@@ -4,6 +4,9 @@ import "./globals.css";
 import SessionProviders from '@/components/SessionProviders';
 import { ToastProvider } from '@/components/toast/ToastContext';
 import { Toaster } from '@/components/toast/Toaster';
+import 'devexpress-gantt/dist/dx-gantt.css';
+import 'devextreme/dist/css/dx.light.css'; 
+import 'devextreme/dist/css/dx.material.blue.light.css';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
