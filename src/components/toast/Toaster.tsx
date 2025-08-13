@@ -1,37 +1,45 @@
 "use client";
 import React from 'react';
 import { useToast } from './ToastContext';
-import { X } from 'lucide-react';
-import clsx from 'clsx';
+import { Toast as DxToast } from 'devextreme-react/toast';
+
+// Mapping helper: create a combined message while allowing richer layout via contentRender if needed later
+function buildMessage(title?: string, description?: string) {
+  if (title && description) return `${title}\n${description}`; // line break inside toast
+  return title || description || '';
+}
 
 export const Toaster: React.FC = () => {
   const { toasts, dismiss } = useToast();
+
+  // DevExtreme displays each toast; we offset them manually so multiple are visible
   return (
-    <div aria-live="polite" aria-atomic="true" className="pointer-events-none fixed top-4 right-4 z-50 flex w-full max-w-sm flex-col gap-3">
-      {toasts.map(t => (
-        <div
-          key={t.id}
-          className={clsx(
-            'pointer-events-auto rounded-md border px-4 py-3 shadow-lg backdrop-blur-sm transition-all',
-            'text-sm flex flex-col gap-1 relative',
-            t.type === 'success' && 'border-green-300 bg-green-50 dark:bg-green-900/40 dark:border-green-700',
-            t.type === 'error' && 'border-red-300 bg-red-50 dark:bg-red-900/40 dark:border-red-700',
-            t.type === 'info' && 'border-sky-300 bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700',
-            t.type === 'warning' && 'border-amber-300 bg-amber-50 dark:bg-amber-900/40 dark:border-amber-700'
-          )}
-          role="status"
-        >
-          <button
-            onClick={() => dismiss(t.id)}
-            className="absolute right-1 top-1 rounded p-1 text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-white"
-            aria-label="Dismiss notification"
-          >
-            <X className="h-4 w-4" />
-          </button>
-          {t.title && <div className="font-medium">{t.title}</div>}
-          {t.description && <div className="text-slate-600 dark:text-slate-300 leading-snug">{t.description}</div>}
-        </div>
-      ))}
+    <div aria-live="polite" aria-atomic="true" className="pointer-events-none fixed inset-0 z-[9999]">
+      {toasts.map((t, idx) => {
+        const verticalOffset = 20 + idx * 90; // px spacing stack
+        return (
+          <DxToast
+            key={t.id}
+            visible={true}
+            message={buildMessage(t.title, t.description)}
+            type={t.type}
+            displayTime={t.duration}
+            closeOnClick={true}
+            onHiding={() => dismiss(t.id)}
+            width={360}
+            maxWidth={420}
+            animation={{
+              show: { type: 'fade', duration: 180 },
+              hide: { type: 'fade', duration: 160 },
+            }}
+            position={{
+              at: { x: 'right', y: 'top' },
+              my: { x: 'right', y: 'top' },
+              offset: { x: 0, y: verticalOffset },
+            }}
+          />
+        );
+      })}
     </div>
   );
 };
