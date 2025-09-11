@@ -5,10 +5,10 @@ import { connectToDatabase } from '@/lib/mongoose';
 export async function POST(req: Request) {
   try {
     await connectToDatabase();
-    const body = await req.json();
-    const { username, email, password } = body ?? {};
+  const body = await req.json();
+  const { username, email, password, userId } = body ?? {};
 
-    if (!username || !email || !password) {
+  if (!username || !email || !password || (userId === undefined || userId === null)) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
@@ -22,14 +22,18 @@ export async function POST(req: Request) {
     if (password.length < 6) {
       return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 });
     }
+    const numericUserId = Number(userId);
+    if (!Number.isInteger(numericUserId) || numericUserId <= 0) {
+      return NextResponse.json({ error: 'Unique integer Id must be a positive integer' }, { status: 400 });
+    }
 
-    const exists = await UserModel.findOne({ $or: [{ username }, { email }] });
+    const exists = await UserModel.findOne({ $or: [{ username }, { email }, { userId: numericUserId }] });
     if (exists) {
       return NextResponse.json({ error: 'User already exists' }, { status: 409 });
     }
 
     try {
-      const user = await UserModel.create({ username, email, password });
+      const user = await UserModel.create({ username, email, password, userId: numericUserId });
 
       console.log('New user registered:', user._id);
 

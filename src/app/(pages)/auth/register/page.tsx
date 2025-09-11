@@ -10,7 +10,7 @@ import { TextBox } from 'devextreme-react/text-box';
 
 export default function Register() {
   const router = useRouter();
-  const [form, setForm] = useState({ username: '', email: '', password: '' });
+  const [form, setForm] = useState({ username: '', email: '', password: '', userId: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { push } = useToast();
@@ -24,10 +24,18 @@ export default function Register() {
     setLoading(true);
     setError(null);
     try {
+      // Basic client validation for userId
+      const numericUserId = Number(form.userId);
+      if (!Number.isInteger(numericUserId) || numericUserId <= 0) {
+        setError('Unique integer Id must be a positive integer');
+        push({ type: 'error', title: 'Invalid Unique Id', description: 'Provide a positive integer for Unique Id.' });
+        setLoading(false);
+        return;
+      }
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, userId: numericUserId }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -68,6 +76,13 @@ export default function Register() {
             <div>
               <label className="block text-xs font-semibold mb-1 uppercase tracking-wide">Username</label>
               <TextBox value={form.username} onValueChanged={(e) => update('username', e.value)} placeholder="johndoe" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1 uppercase tracking-wide">Unique integer Id</label>
+              <TextBox value={form.userId} onValueChanged={(e) => update('userId', e.value)} placeholder="e.g. 12345" />
+              {form.userId && (!Number.isInteger(Number(form.userId)) || Number(form.userId) <= 0) && (
+                <div className="mt-1 text-[11px] text-red-600 dark:text-red-400">Must be a positive integer.</div>
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1 uppercase tracking-wide">Email</label>
