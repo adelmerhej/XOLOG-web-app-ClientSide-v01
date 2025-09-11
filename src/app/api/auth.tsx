@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { defaultUser } from '@/utils/default-user';
 import process from 'process';
 
