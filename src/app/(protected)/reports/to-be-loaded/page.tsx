@@ -13,6 +13,7 @@ import { fetchTobeLoadedData } from '@/app/api/client/reports/tobe-loaded/TobeLo
 
 // Import auth context for token access
 import { useAuth } from '@/contexts/auth';
+import { useSession } from 'next-auth/react';
 
 import {
   DataGrid, DataGridRef,
@@ -44,6 +45,7 @@ const formatCurrency = (amount: number): string => {
 export default function TobeLoadedClientReport() {
   // Get auth context for token access (when auth system includes tokens)
   const { user } = useAuth();
+  const { data: session } = useSession();
 
   const [gridDataSource, setGridDataSource] = useState<DataSource<IOngoingJob, string>>();
   const [totalProfit, setTotalProfit] = useState<number>(0);
@@ -54,7 +56,8 @@ export default function TobeLoadedClientReport() {
     // Helper function to load "To Be Loaded" data specifically
   const loadToBeLoadedData = useCallback(async() => {
     // If user not authenticated yet, don't call the API
-    if (!user?.token) {
+    const apiToken = user?.token || session?.user?.sessionToken;
+    if (!apiToken) {
       return [];
     }
     const params: {
@@ -68,9 +71,9 @@ export default function TobeLoadedClientReport() {
       page: 1,
       limit: 0,
       jobStatusType: 'To Be Loaded', // Filter specifically for "To Be Loaded" status
-      token: user.token,
-      email:  user.email,
-      userId: user.userId,
+      token: apiToken,
+      email:  user?.email,
+      userId: user?.userId ?? (session?.user?.userId as number | undefined),
       // prefer numeric/string id; fallback to unique email if needed
       // userId: user.userId ?? user.email, // prefer numeric/string id; fallback to unique email if needed
     };
@@ -88,7 +91,7 @@ export default function TobeLoadedClientReport() {
       console.error('Error loading To Be Loaded data:', error);
       return [];
     }
-  }, [user?.token, user?.userId, user?.email]);
+  }, [user?.token, user?.userId, user?.email, session?.user?.sessionToken, session?.user?.userId]);
 
   useEffect(() => {
     setGridDataSource(new DataSource({

@@ -11,6 +11,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       _id: string;
+      userId?: number;
       role?: string;
       sessionToken?: string;
       sessionCreatedAt?: number;
@@ -21,6 +22,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
+    userId?: number;
     role?: string;
     sessionToken?: string;
     sessionCreatedAt?: number;
@@ -46,17 +48,18 @@ const handler = NextAuth({
         const lookup = identifier.includes('@')
           ? { email: identifier.toLowerCase() }
           : { username: identifier };
-        const userDoc = await UserModel.findOne(lookup).select("+password username email role");
+  const userDoc = await UserModel.findOne(lookup).select("+password username email role userId");
         if (!userDoc) return null;
 
         const isValid = await compare(credentials.password, userDoc.password);
         if (!isValid) return null;
-        interface SafeUser extends NextAuthUser { role?: string; username?: string; }
+        interface SafeUser extends NextAuthUser { role?: string; username?: string; userId?: number }
         const safeUser: SafeUser = {
           id: (userDoc._id as unknown as { toString(): string }).toString(),
           name: userDoc.username,
           email: userDoc.email,
           role: userDoc.role,
+          userId: userDoc.userId,
         };
         return safeUser;
       },
@@ -72,6 +75,9 @@ const handler = NextAuth({
         const u = user as NextAuthUser & { role?: string };
         token.id = u.id;
         token.role = u.role;
+        // Attach numeric userId
+        const maybeUserId = (user as { userId?: number }).userId;
+        if (typeof maybeUserId === 'number') token.userId = maybeUserId;
         // Generate a custom session token only at sign in
         const sessionObj = newSession(new ObjectId(token.id as string));
         token.sessionToken = sessionObj.token;
@@ -91,6 +97,7 @@ const handler = NextAuth({
       if (token && session.user) {
         session.user._id = String(token.id);
         session.user.role = token.role as string | undefined;
+        if (typeof token.userId === 'number') session.user.userId = token.userId;
         session.user.sessionToken = token.sessionToken;
         session.user.sessionCreatedAt = token.sessionCreatedAt;
       }
