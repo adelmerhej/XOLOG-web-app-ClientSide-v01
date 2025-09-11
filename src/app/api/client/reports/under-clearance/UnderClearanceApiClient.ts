@@ -102,7 +102,7 @@ export async function syncOngoingJobsData() {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/v1/sync/sync-ongoing-jobs`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/v1/sync/sync-under-clearance`, {
       method: 'POST',
       headers: headers,
     });

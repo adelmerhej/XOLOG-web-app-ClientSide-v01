@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
 'use server';
 
 import { signIn } from '@/app/api/auth';
 
-const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients/`;
+// Use the same base URL pattern as other clients to avoid env/token mismatches
+const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients`;
 
 const getData = async(queryString?: string, token?: string) => {
 
@@ -24,18 +26,19 @@ const getData = async(queryString?: string, token?: string) => {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch Client Invoices');
+      throw new Error('Failed to fetch ongoing jobs');
     }
 
     const data = await response.json();
+
     return data;
 
   } catch (error) { /* empty */ }
 
 };
 
-// Client-side function to fetch Client Invoices (for React components)
-export async function fetchClientInvoices(params: {
+// Client-side function to fetch ongoing jobs (for React components)
+export async function fetchOngoingJobs(params: {
   page?: number;
   limit?: number;
   jobStatusType?: string;
@@ -60,7 +63,7 @@ export async function fetchClientInvoices(params: {
     // Get the query string
     const queryString = queryParams.toString();
 
-    // Use the getData function to fetch all Client Invoices from MongoDB
+    // Use the getData function to fetch all Job Status from MongoDB
     const signInResult = await signIn('admin@xolog.com', 'Admin@Xolog#16');
     let token: string | undefined = undefined;
     if (signInResult && signInResult.isOk && signInResult.data && signInResult.data.token) {
@@ -68,19 +71,20 @@ export async function fetchClientInvoices(params: {
     }
 
     params.token = token;
-
     const data = await getData(queryString, params.token);
+
     // Return the data directly - assuming the API returns the expected format
-    return data?.data || data || [];
+
+    return data || data || [];
 
   } catch (error: unknown) {
-    console.error('Error fetching Client Invoices:', error);
+    console.error('Error fetching ongoing jobs:', error);
 
     throw error;
   }
 }
 
-export async function syncClientInvoicesData() {
+export async function syncOngoingJobsData() {
   try {
 
     // Use the getData function to fetch all Client Invoices from MongoDB
@@ -99,20 +103,20 @@ export async function syncClientInvoicesData() {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/v1/sync/sync-client-invoices`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/v1/sync/sync-invoice-status`, {
       method: 'POST',
       headers: headers,
     });
 
     if (!response.ok) {
-      throw new Error('Failed to sync Client Invoices');
+      throw new Error('Failed to sync Ongoing Jobs');
     }
 
     const data = await response.json();
     return data;
 
   } catch (error) {
-    console.error('Error syncing Client Invoices:', error);
+    console.error('Error syncing Ongoing Jobs:', error);
     throw error;
   }
 }

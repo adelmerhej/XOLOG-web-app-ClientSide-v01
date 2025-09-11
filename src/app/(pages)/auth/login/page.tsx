@@ -56,7 +56,8 @@ function LoginInner() {
         push({ type: 'error', title: 'Login Failed', description: msg });
       } else {
         push({ type: 'success', title: 'Welcome', description: 'Login successful.' });
-        router.push(res.url || callbackUrl);
+        // Avoid absolute redirects that could point to localhost by forcing same-origin path
+        router.push(callbackUrl);
       }
       
   } catch {

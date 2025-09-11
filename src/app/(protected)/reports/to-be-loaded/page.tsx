@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
@@ -10,10 +9,7 @@ import { Workbook } from 'exceljs';
 import AppLayout from '@/components/layout/Layout';
 
 // Import ongoing jobs API
-import {
-  fetchOngoingJobs,
-  syncOngoingJobsData,
-} from '@/app/api/client/reports/tobe-loaded/TobeLoadedApiClient';
+import { fetchOngoingJobs } from '@/app/api/client/reports/tobe-loaded/TobeLoadedApiClient';
 
 // Import auth context for token access
 import { useAuth } from '@/contexts/auth';
@@ -57,14 +53,22 @@ export default function TobeLoadedClientReport() {
 
     // Helper function to load "To Be Loaded" data specifically
   const loadToBeLoadedData = useCallback(async() => {
+    // If user not authenticated yet, don't call the API
+    if (!user?.token) {
+      return [];
+    }
     const params: {
       page: number;
       limit: number;
       jobStatusType?: string;
+      token?: string;
+      userId?: string | number;
     } = {
       page: 1,
       limit: 0,
       jobStatusType: 'To Be Loaded', // Filter specifically for "To Be Loaded" status
+      token: user.token,
+      userId: user.userId ?? user.email, // prefer numeric/string id; fallback to unique email if needed
     };
 
     try {
@@ -80,7 +84,7 @@ export default function TobeLoadedClientReport() {
       console.error('Error loading To Be Loaded data:', error);
       return [];
     }
-  }, []);
+  }, [user?.token, user?.userId, user?.email]);
 
   useEffect(() => {
     setGridDataSource(new DataSource({
@@ -88,24 +92,6 @@ export default function TobeLoadedClientReport() {
       load: loadToBeLoadedData,
     }));
   }, [loadToBeLoadedData]);
-
-  const syncAndUpdateData = useCallback(async() => {
-    setIsSyncing(true);
-    try {
-      const result = await syncOngoingJobsData();
-
-      if (!result.success) {
-        throw new Error('Failed to sync To Be Loaded data');
-      }
-      refresh();
-      notify('To Be Loaded data synced successfully', 'success', 3000);
-    } catch (error) {
-      console.error('Error syncing To Be Loaded data:', error);
-      notify('Error syncing data', 'error', 3000);
-    } finally {
-      setIsSyncing(false);
-    }
-  }, []);
 
   const refresh = useCallback(() => {
     gridRef.current?.instance().refresh();

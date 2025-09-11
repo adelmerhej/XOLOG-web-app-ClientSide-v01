@@ -4,8 +4,8 @@
 
 import { signIn } from '@/app/api/auth';
 
-const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients/`;
-
+// Use the same base URL pattern as other clients to avoid env/token mismatches
+const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients`;
 const getData = async(queryString?: string, token?: string) => {
 
   try {
@@ -102,7 +102,7 @@ export async function syncOngoingJobsData() {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/v1/sync/sync-ongoing-jobs`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/v1/sync/sync-on-water`, {
       method: 'POST',
       headers: headers,
     });
