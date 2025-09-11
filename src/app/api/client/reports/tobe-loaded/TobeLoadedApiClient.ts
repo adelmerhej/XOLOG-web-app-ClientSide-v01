@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
+'use server';
+
 import { signIn } from '@/app/api/auth';
 
-const baseUrl = `http://myaccount.xolog.com:5055/api/v1/admin/reports`;
-
+// Use the same base URL pattern as other clients to avoid env/token mismatches
+const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients`;
 const getData = async(queryString?: string, token?: string) => {
 
   try {
@@ -16,10 +19,10 @@ const getData = async(queryString?: string, token?: string) => {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    console.log('Fetching ongoing jobs with query:',
-      `${process.env.REACT_APP_API_URL}/api/v1/admin/reports`);
+    // Optional debug: 
+    console.log('Fetching baseUrl', `${baseUrl}/to-be-loaded${queryString ? `?${queryString}` : ''}`);
 
-    const response = await fetch(`${baseUrl}/ongoing-jobs${queryString ? `?${queryString}` : ''}`, {
+    const response = await fetch(`${baseUrl}/to-be-loaded${queryString ? `?${queryString}` : ''}`, {
       method: 'GET',
       headers: headers,
     });

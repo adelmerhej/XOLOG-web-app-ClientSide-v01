@@ -49,8 +49,6 @@ const handler = NextAuth({
         const userDoc = await UserModel.findOne(lookup).select("+password username email role");
         if (!userDoc) return null;
 
-        console.log("User found:", credentials.password, userDoc.password);
-
         const isValid = await compare(credentials.password, userDoc.password);
         if (!isValid) return null;
         interface SafeUser extends NextAuthUser { role?: string; username?: string; }

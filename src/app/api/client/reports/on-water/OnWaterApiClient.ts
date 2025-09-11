@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
+'use server';
+
 import { signIn } from '@/app/api/auth';
 
-const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/admin/reports`;
+const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients/`;
 
 const getData = async(queryString?: string, token?: string) => {
 
@@ -16,7 +19,7 @@ const getData = async(queryString?: string, token?: string) => {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${baseUrl}/ongoing-jobs${queryString ? `?${queryString}` : ''}`, {
+    const response = await fetch(`${baseUrl}/on-water${queryString ? `?${queryString}` : ''}`, {
       method: 'GET',
       headers: headers,
     });

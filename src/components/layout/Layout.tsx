@@ -4,6 +4,7 @@ import { signOut, useSession } from 'next-auth/react';
 import { Menu, Sun, Moon, Bell } from 'lucide-react';
 import Link from 'next/link';
 import clsx from 'clsx';
+import { appInfo } from '../../utils/app-info';
 
 interface NavSection {
 	title: string;
@@ -54,8 +55,8 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
 					'hidden md:flex'
 				)}
 			>
-				<div className="flex items-center justify-between px-4 h-14 border-b border-sky-100 dark:border-slate-700">
-					<span className={clsx('font-bold text-sky-600 dark:text-sky-400 whitespace-nowrap transition-opacity', collapsed && 'opacity-0 pointer-events-none')}>XOLOG</span>
+				<div className={clsx('flex items-center px-4 h-14 border-b border-sky-100 dark:border-slate-700', collapsed ? 'justify-center' : 'justify-between')}>
+					<span className={clsx('font-bold text-sky-600 dark:text-sky-400 whitespace-nowrap', collapsed && 'hidden')}>{appInfo.title}</span>
 					<button onClick={() => setCollapsed((c) => !c)} className="p-1 rounded hover:bg-sky-100 dark:hover:bg-slate-700">
 						{collapsed ? '›' : '‹'}
 					</button>

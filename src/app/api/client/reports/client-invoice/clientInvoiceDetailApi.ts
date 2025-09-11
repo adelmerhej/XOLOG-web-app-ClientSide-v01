@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+'use server';
+
 import { signIn } from '@/app/api/auth';
 
-const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/admin/reports`;
+const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients/`;
 
 const getData = async(queryString?: string, token?: string) => {
 
