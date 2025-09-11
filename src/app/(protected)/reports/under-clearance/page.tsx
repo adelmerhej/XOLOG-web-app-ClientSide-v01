@@ -11,8 +11,7 @@ import AppLayout from '@/components/layout/Layout';
 
 // Importing data fetching function
 import {
-  fetchOngoingJobs,
-  syncOngoingJobsData,
+  fetchUnderClearanceData
 } from '@/app/api/client/reports/under-clearance/UnderClearanceApiClient';
 
 // Import auth context for token access
@@ -135,7 +134,7 @@ export default function UnderClearanceClientReport() {
       }
     }
 
-    const data = await fetchOngoingJobs(params);
+    const data = await fetchUnderClearanceData(params);
     // If API response has a totalProfit field, use it for accurate total
     if (data && typeof data === 'object' && 'totalProfit' in data) {
       setTotalProfit(data.totalProfit || 0);
@@ -152,25 +151,6 @@ export default function UnderClearanceClientReport() {
       load: loadUnderClearanceData,
     }));
   }, [loadUnderClearanceData]);
-
-  const syncAndUpdateData = useCallback(async() => {
-    setIsSyncing(true);
-    try {
-      const result = await syncOngoingJobsData();
-
-      if (!result.success) {
-        throw new Error('Failed to sync Under Clearance data', result);
-      }
-      refresh();
-      notify('Under Clearance data synced successfully', 'success', 3000);
-    } catch (error) {
-      console.error('Error loading Under Clearance data:', error);
-      return [];
-    }finally {
-      setIsSyncing(false);
-    }
-
-  }, []);
 
   const filterByJobPaymentStatus = useCallback((e: DropDownButtonTypes.SelectionChangedEvent) => {
     const { item: paymentStatus }: { item: FilterJobStatusPaymentType } = e;

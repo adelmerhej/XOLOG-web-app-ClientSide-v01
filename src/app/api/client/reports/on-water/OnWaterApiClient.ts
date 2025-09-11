@@ -37,7 +37,7 @@ const getData = async(queryString?: string, token?: string) => {
 };
 
 // Client-side function to fetch ongoing jobs (for React components)
-export async function fetchOngoingJobs(params: {
+export async function fetchOnWaterData(params: {
   page?: number;
   limit?: number;
   jobStatusType?: string;
@@ -79,43 +79,6 @@ export async function fetchOngoingJobs(params: {
   } catch (error: unknown) {
     console.error('Error fetching ongoing jobs:', error);
 
-    throw error;
-  }
-}
-
-export async function syncOngoingJobsData() {
-  try {
-
-    // Use the getData function to fetch all Client Invoices from MongoDB
-    const signInResult = await signIn('admin@xolog.com', 'Admin@Xolog#16');
-    let token: string | undefined = undefined;
-    if (signInResult && signInResult.isOk && signInResult.data && signInResult.data.token) {
-      token = signInResult.data.token;
-    }
-
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-
-    // Add Authorization header if token is provided
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/v1/sync/sync-on-water`, {
-      method: 'POST',
-      headers: headers,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to sync Ongoing Jobs');
-    }
-
-    const data = await response.json();
-    return data;
-
-  } catch (error) {
-    console.error('Error syncing Ongoing Jobs:', error);
     throw error;
   }
 }

@@ -9,7 +9,7 @@ import { Workbook } from 'exceljs';
 import AppLayout from '@/components/layout/Layout';
 
 // Import ongoing jobs API
-import { fetchOngoingJobs } from '@/app/api/client/reports/tobe-loaded/TobeLoadedApiClient';
+import { fetchTobeLoadedData } from '@/app/api/client/reports/tobe-loaded/TobeLoadedApiClient';
 
 // Import auth context for token access
 import { useAuth } from '@/contexts/auth';
@@ -72,7 +72,7 @@ export default function TobeLoadedClientReport() {
     };
 
     try {
-      const data = await fetchOngoingJobs(params);
+      const data = await fetchTobeLoadedData(params);
       // If API response has a totalProfit field, use it for accurate total
       if (data && typeof data === 'object' && 'totalProfit' in data) {
         setTotalProfit(data.totalProfit || 0);

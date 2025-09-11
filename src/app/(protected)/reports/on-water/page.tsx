@@ -11,8 +11,8 @@ import AppLayout from '@/components/layout/Layout';
 
 // Import OnWater jobs API
 import {
-  fetchOngoingJobs,
-  syncOngoingJobsData,
+  fetchOnWaterData,
+
 } from '@/app/api/client/reports/on-water/OnWaterApiClient';
 
 // Import auth context for token access
@@ -68,7 +68,7 @@ export default function OnWater() {
     };
 
     try {
-      const data = await fetchOngoingJobs(params);
+      const data = await fetchOnWaterData(params);
       // If API response has a totalProfit field, use it for accurate total
       if (data && typeof data === 'object' && 'totalProfit' in data) {
         setTotalProfit(data.totalProfit || 0);
@@ -88,24 +88,6 @@ export default function OnWater() {
       load: loadOnWaterData,
     }));
   }, [loadOnWaterData]);
-
-  const syncAndUpdateData = useCallback(async() => {
-    setIsSyncing(true);
-    try {
-      const result = await syncOngoingJobsData();
-
-      if (!result.success) {
-        throw new Error('Failed to sync On Water data');
-      }
-      refresh();
-      notify('On Water data synced successfully', 'success', 3000);
-    } catch (error) {
-      console.error('Error syncing On Water data:', error);
-      notify('Error syncing data', 'error', 3000);
-    } finally {
-      setIsSyncing(false);
-    }
-  }, []);
 
   const refresh = useCallback(() => {
     gridRef.current?.instance().refresh();

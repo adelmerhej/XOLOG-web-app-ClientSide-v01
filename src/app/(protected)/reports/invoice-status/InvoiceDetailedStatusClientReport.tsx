@@ -6,8 +6,7 @@ import { ArrayStore, DataSource } from 'devextreme-react/common/data';
 import { IClientInvoice } from '@/types/clientInvoice';
 // Importing data fetching function
 import {
-  fetchClientInvoices,
-  syncClientInvoicesData,
+  fetchClientInvoices
 } from '@/app/api/client/reports/client-invoice/clientInvoiceApi';
 
 // Helper function to format number with thousand separators

@@ -10,8 +10,7 @@ import AppLayout from '@/components/layout/Layout';
 
 // Importing data fetching functions
 import {
-  fetchClientInvoices,
-  syncClientInvoicesData,
+  fetchClientInvoices
 } from '@/app/api/client/reports/client-invoice/clientInvoiceApi';
 
 // Import auth context for token access
@@ -107,25 +106,6 @@ const [gridDataSource, setGridDataSource] = useState<DataSource<IClientInvoice, 
   const refresh = useCallback(() => {
     gridRef.current?.instance().refresh();
   }, []);
-
-  const syncAndUpdateData = useCallback(async() => {
-    setIsSyncing(true);
-
-    try {
-      const result = await syncClientInvoicesData();
-
-      if (!result.success) {
-        throw new Error('Failed to sync Invoice Status data', result);
-      }
-      refresh();
-      notify('Invoice Status data synced successfully', 'success', 3000);
-    } catch (error) {
-      console.error('Error loading invoice status:', error);
-      return [];
-    }finally {
-      setIsSyncing(false);
-    }
-  }, [refresh]);
 
   // Helper function to load data - no filters applied
   const loadInvoiceStatusData = useCallback(async() => {
