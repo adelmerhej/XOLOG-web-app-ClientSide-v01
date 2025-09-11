@@ -3,7 +3,7 @@ import process from 'process';
 
 export async function signIn(email: string, password: string) {
   try {
-    const baseUrl = `http://192.168.88.16:5055`;
+    const baseUrl = process.env.REACT_APP_API_URL;
     const response = await fetch(`${baseUrl}/api/v1/auth/login`, {
       method: 'POST',
       headers: {

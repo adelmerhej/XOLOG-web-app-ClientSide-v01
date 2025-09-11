@@ -12,6 +12,7 @@
     "@auth/mongodb-adapter": "^3.10.0",
     "@google/genai": "^1.13.0",
     "@next/env": "^15.4.6",
+    "@progress/kendo-theme-default": "^12.0.1",
     "@tailwindcss/cli": "^4.1.11",
     "@types/file-saver-es": "^2.0.3",
     "@types/lodash": "^4.17.20",

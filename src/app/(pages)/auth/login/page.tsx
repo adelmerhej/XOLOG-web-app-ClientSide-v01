@@ -33,15 +33,18 @@ function LoginInner() {
   async function handleSubmit(e?: { preventDefault?: () => void }) {
     e?.preventDefault?.();
     if (!formValid) return;
+
     try {
       setLoading(true);
       setError(null);
+
       const res = await signIn('credentials', {
         identifier: identifier.trim(),
         password,
         redirect: false,
         callbackUrl,
       });
+
       if (!res) {
         setError('Unexpected error: no response');
         push({ type: 'error', title: 'Login Failed', description: 'Unexpected: no response from server.' });
@@ -55,6 +58,7 @@ function LoginInner() {
         push({ type: 'success', title: 'Welcome', description: 'Login successful.' });
         router.push(res.url || callbackUrl);
       }
+      
   } catch {
       setError('Login failed');
       push({ type: 'error', title: 'Login Failed', description: 'Network or server issue.' });
