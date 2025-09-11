@@ -62,13 +62,17 @@ export default function TobeLoadedClientReport() {
       limit: number;
       jobStatusType?: string;
       token?: string;
-      userId?: string | number;
+      userId?: number;
+      email?: string;
     } = {
       page: 1,
       limit: 0,
       jobStatusType: 'To Be Loaded', // Filter specifically for "To Be Loaded" status
       token: user.token,
-      userId: user.userId ?? user.email, // prefer numeric/string id; fallback to unique email if needed
+      email:  user.email,
+      userId: user.userId,
+      // prefer numeric/string id; fallback to unique email if needed
+      // userId: user.userId ?? user.email, // prefer numeric/string id; fallback to unique email if needed
     };
 
     try {

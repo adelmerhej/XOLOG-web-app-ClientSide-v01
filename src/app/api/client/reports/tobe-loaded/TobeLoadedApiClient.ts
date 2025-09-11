@@ -16,6 +16,7 @@ const getData = async(queryString?: string, token?: string) => {
     }
 
     console.log('Fetching ongoing jobs with token:', token);
+    console.log('Fetching ongoing jobs with token:', token);
 
     const response = await fetch(`${baseUrl}/to-be-loaded${queryString ? `?${queryString}` : ''}`, {
       method: 'GET',

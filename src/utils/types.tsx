@@ -30,7 +30,7 @@ export interface User {
   name: string;
   email: string;
   token?: string;
-  userId?: string | number;
+  userId?: number;
   avatarUrl: string;
 }
 
