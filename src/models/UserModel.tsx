@@ -14,6 +14,7 @@ interface IUser extends Document {
   role: UserRole;
   loginAttempts: number;
   lockUntil: Date;
+  userId: number;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -77,6 +78,11 @@ const UserSchema: Schema<IUser> = new Schema(
     },
     lockUntil: {
       type: Date,
+    },
+    userId: {
+      type: Number,
+      unique: true,
+      required: true,
     },
   },
   {
