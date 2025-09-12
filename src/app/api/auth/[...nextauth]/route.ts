@@ -13,6 +13,7 @@ declare module "next-auth" {
       _id: string;
       userId?: number;
       role?: string;
+      apiToken?: string;
       sessionToken?: string;
       sessionCreatedAt?: number;
     } & DefaultSession["user"];
@@ -24,6 +25,7 @@ declare module "next-auth/jwt" {
     id?: string;
     userId?: number;
     role?: string;
+    apiToken?: string;
     sessionToken?: string;
     sessionCreatedAt?: number;
   }
@@ -48,12 +50,13 @@ const handler = NextAuth({
         const lookup = identifier.includes('@')
           ? { email: identifier.toLowerCase() }
           : { username: identifier };
-  const userDoc = await UserModel.findOne(lookup).select("+password username email role userId");
+  
+          const userDoc = await UserModel.findOne(lookup).select("+password username email role userId");
         if (!userDoc) return null;
 
         const isValid = await compare(credentials.password, userDoc.password);
         if (!isValid) return null;
-        interface SafeUser extends NextAuthUser { role?: string; username?: string; userId?: number }
+        interface SafeUser extends NextAuthUser { role?: string; username?: string; userId?: number; apiToken?: string }
         const safeUser: SafeUser = {
           id: (userDoc._id as unknown as { toString(): string }).toString(),
           name: userDoc.username,
@@ -61,6 +64,23 @@ const handler = NextAuth({
           role: userDoc.role,
           userId: userDoc.userId,
         };
+        // Also obtain API token (JWT) from backend using server-side creds
+        try {
+          const apiBase = process.env.REACT_APP_API_URL;
+          if (apiBase) {
+            const apiRes = await fetch(`${apiBase}/api/v1/auth/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userDoc.email, password: credentials.password }),
+            });
+            if (apiRes.ok) {
+              const body = (await apiRes.json()) as { token?: string };
+              if (body?.token) safeUser.apiToken = body.token;
+            }
+          }
+        } catch {
+          // ignore API token failure; user can still log in
+        }
         return safeUser;
       },
     }),
@@ -78,8 +98,12 @@ const handler = NextAuth({
         // Attach numeric userId
         const maybeUserId = (user as { userId?: number }).userId;
         if (typeof maybeUserId === 'number') token.userId = maybeUserId;
+        // Attach API JWT token if available
+        const maybeApiToken = (user as { apiToken?: string }).apiToken;
+        if (typeof maybeApiToken === 'string') token.apiToken = maybeApiToken;
         // Generate a custom session token only at sign in
         const sessionObj = newSession(new ObjectId(token.id as string));
+        
         token.sessionToken = sessionObj.token;
         token.sessionCreatedAt = sessionObj.createdAt;
       } else {
@@ -98,6 +122,7 @@ const handler = NextAuth({
         session.user._id = String(token.id);
         session.user.role = token.role as string | undefined;
         if (typeof token.userId === 'number') session.user.userId = token.userId;
+        if (typeof token.apiToken === 'string') session.user.apiToken = token.apiToken;
         session.user.sessionToken = token.sessionToken;
         session.user.sessionCreatedAt = token.sessionCreatedAt;
       }

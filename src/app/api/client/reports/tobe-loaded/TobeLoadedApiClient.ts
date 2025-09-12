@@ -1,5 +1,11 @@
-// Use NEXT_PUBLIC_* so it's available in the browser bundle
-const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/clients`;
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+'use server';
+
+import { signIn } from '@/app/api/auth';
+
+// Use the same base URL pattern as other clients to avoid env/token mismatches
+const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients`;
 const getData = async(queryString?: string, token?: string) => {
 
   try {
@@ -8,68 +14,70 @@ const getData = async(queryString?: string, token?: string) => {
       'Content-Type': 'application/json',
     };
 
-    // Add Authorization header only if token looks like a JWT to avoid 'jwt malformed'
-    const isLikelyJwt = typeof token === 'string' && token.split('.').length === 3;
-    if (isLikelyJwt) {
+    // Add Authorization header if token is provided
+    if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    // Debug visibility
-    // console.log('Fetching To Be Loaded data', { url: `${baseUrl}/to-be-loaded`, queryString, hasToken: Boolean(token) });
-
-  const response = await fetch(`${baseUrl}/to-be-loaded${queryString ? `?${queryString}` : ''}`, {
+    const response = await fetch(`${baseUrl}/to-be-loaded${queryString ? `?${queryString}` : ''}`, {
       method: 'GET',
       headers: headers,
     });
 
     if (!response.ok) {
-      const text = await response.text().catch(() => '');
-      console.error('ToBeLoaded fetch failed', response.status, text);
-      throw new Error(`Failed to fetch To Be Loaded (${response.status})`);
+      throw new Error('Failed to fetch ongoing jobs');
     }
 
     const data = await response.json();
 
     return data;
 
-  } catch (error) {
-    console.error('ToBeLoaded fetch error', error);
-    throw error;
-  }
+  } catch (error) { /* empty */ }
 
 };
 
 // Client-side function to fetch ongoing jobs (for React components)
 export async function fetchTobeLoadedData(params: {
+  page?: number;
+  limit?: number;
+  jobStatusType?: string;
   token?: string;
-  userId?: string | number;
+  fullPaid?: string;
+  statusType?: string;
+  departmentId?: number;
+  jobType?: number;
 } = {}) {
   try {
     // Build query parameters
     const queryParams = new URLSearchParams();
-    // Only include supported params for this endpoint
-    if (params.userId !== undefined && params.userId !== null) {
-      queryParams.set('userId', String(params.userId));
-    }
+
+    if (params.page) queryParams.set('page', params.page.toString());
+    if (params.limit) queryParams.set('limit', params.limit.toString());
+    if (params.jobStatusType) queryParams.set('jobStatusType', params.jobStatusType);
+    if (params.statusType) queryParams.set('statusType', params.statusType);
+    if (params.departmentId) queryParams.set('departmentId', params.departmentId.toString());
+    if (params.fullPaid) queryParams.set('fullPaid', params.fullPaid.toString());
+    if (params.jobType) queryParams.set('jobType', params.jobType.toString());
 
     // Get the query string
     const queryString = queryParams.toString();
 
     // Use the getData function to fetch all Job Status from MongoDB
-    // const signInResult = await signIn('admin@xolog.com', 'Admin@Xolog#16');
-    // let token: string | undefined = undefined;
-    // if (signInResult && signInResult.isOk && signInResult.data && signInResult.data.token) {
-    //   token = signInResult.data.token;
-    // }
+    const signInResult = await signIn('admin@xolog.com', 'Admin@Xolog#16');
+    let token: string | undefined = undefined;
+    if (signInResult && signInResult.isOk && signInResult.data && signInResult.data.token) {
+      token = signInResult.data.token;
+    }
 
-    //params.token = token;
+    params.token = token;
     const data = await getData(queryString, params.token);
 
-  // Return the data directly - assuming the API returns the expected format
-  return data ?? [];
+    // Return the data directly - assuming the API returns the expected format
+
+    return data || data || [];
 
   } catch (error: unknown) {
-  console.error('Error fetching To Be Loaded:', error);
+    console.error('Error fetching ongoing jobs:', error);
 
     throw error;
   }

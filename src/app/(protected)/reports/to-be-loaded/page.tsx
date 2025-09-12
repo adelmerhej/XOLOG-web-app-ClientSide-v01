@@ -56,8 +56,9 @@ export default function TobeLoadedClientReport() {
     // Helper function to load "To Be Loaded" data specifically
   const loadToBeLoadedData = useCallback(async() => {
     // If user not authenticated yet, don't call the API
-    const apiToken = user?.token || session?.user?.sessionToken;
-    if (!apiToken) {
+  const apiToken = session?.user?.apiToken || user?.token || undefined;
+
+   if (!apiToken) {
       return [];
     }
     const params: {
@@ -78,7 +79,11 @@ export default function TobeLoadedClientReport() {
       // userId: user.userId ?? user.email, // prefer numeric/string id; fallback to unique email if needed
     };
 
+    console.log('Loading token:', params.token, apiToken);
+
     try {
+      console.log('Calling fetchTobeLoadedData with params:', params);
+      
       const data = await fetchTobeLoadedData(params);
       // If API response has a totalProfit field, use it for accurate total
       if (data && typeof data === 'object' && 'totalProfit' in data) {
@@ -91,7 +96,7 @@ export default function TobeLoadedClientReport() {
       console.error('Error loading To Be Loaded data:', error);
       return [];
     }
-  }, [user?.token, user?.userId, user?.email, session?.user?.sessionToken, session?.user?.userId]);
+  }, [user?.token, user?.userId, user?.email, session?.user?.userId, session?.user?.apiToken]);
 
   useEffect(() => {
     setGridDataSource(new DataSource({
