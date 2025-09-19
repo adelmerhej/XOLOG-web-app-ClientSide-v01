@@ -33,7 +33,7 @@ import { exportDataGrid as exportDataGridToPdf } from 'devextreme/pdf_exporter';
 import { exportDataGrid as exportDataGridToXLSX } from 'devextreme/excel_exporter';
 
 import { JobStatusPayment as JobStatusPaymentType,
-  IOngoingJob } from '@/types/TobeLoadedJob';
+  IUnderClearanceJob } from '@/types/UnderClearance';
 
 import { JOB_STATUS_PAYMENT } from '../../../../shared/constants';
 import DataSource from 'devextreme/data/data_source';
@@ -101,7 +101,7 @@ export default function UnderClearanceClientReport() {
   // Get auth context for token access (when auth system includes tokens)
   const { user } = useAuth();
 
-  const [gridDataSource, setGridDataSource] = useState<DataSource<IOngoingJob, string>>();
+  const [gridDataSource, setGridDataSource] = useState<DataSource<IUnderClearanceJob, string>>();
   const [paymentStatus, setPaymentStatus] = useState(filterPaymentList[0]);
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string | null>(null);
   const [totalProfit, setTotalProfit] = useState<number>(0);
