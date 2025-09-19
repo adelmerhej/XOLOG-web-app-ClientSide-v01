@@ -33,7 +33,7 @@ import { exportDataGrid as exportDataGridToPdf } from 'devextreme/pdf_exporter';
 import { exportDataGrid as exportDataGridToXLSX } from 'devextreme/excel_exporter';
 
 import { JobStatusPayment as JobStatusPaymentType,
-  IOngoingJob } from '@/types/ongoingJob';
+  IOngoingJob } from '@/types/TobeLoadedJob';
 
 import { JOB_STATUS_PAYMENT } from '../../../../shared/constants';
 import DataSource from 'devextreme/data/data_source';

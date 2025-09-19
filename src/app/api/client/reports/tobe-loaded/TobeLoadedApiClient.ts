@@ -6,9 +6,17 @@ import { signIn } from '@/app/api/auth';
 
 // Use the same base URL pattern as other clients to avoid env/token mismatches
 const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients`;
-const getData = async(queryString?: string, token?: string) => {
+const getData = async(queryString?: string, token?: string, userId?: number) => {
 
   try {
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    if (userId) {
+      queryParams.set('userId', userId.toString());
+    }
+
+    console.log('queryString', queryString)
+    console.log('userId', userId)
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -46,6 +54,7 @@ export async function fetchTobeLoadedData(params: {
   statusType?: string;
   departmentId?: number;
   jobType?: number;
+  userId?: number;
 } = {}) {
   try {
     // Build query parameters
@@ -58,6 +67,7 @@ export async function fetchTobeLoadedData(params: {
     if (params.departmentId) queryParams.set('departmentId', params.departmentId.toString());
     if (params.fullPaid) queryParams.set('fullPaid', params.fullPaid.toString());
     if (params.jobType) queryParams.set('jobType', params.jobType.toString());
+    if (params.userId) queryParams.set('userId', params.userId.toString());
 
     // Get the query string
     const queryString = queryParams.toString();
@@ -70,7 +80,10 @@ export async function fetchTobeLoadedData(params: {
     }
 
     params.token = token;
-    const data = await getData(queryString, params.token);
+
+    console.log("params", params)
+    
+     const data = await getData(queryString, params.token, params.userId);
 
     // Return the data directly - assuming the API returns the expected format
 

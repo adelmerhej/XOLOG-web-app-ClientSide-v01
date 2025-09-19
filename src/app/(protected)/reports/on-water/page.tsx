@@ -32,7 +32,7 @@ import { exportDataGrid as exportDataGridToXLSX } from 'devextreme/excel_exporte
 import DataSource from 'devextreme/data/data_source';
 import notify from 'devextreme/ui/notify';
 
-import { IOngoingJob } from '@/types/ongoingJob';
+import { IOngoingJob } from '@/types/TobeLoadedJob';
 
 const exportFormats = ['xlsx', 'pdf'];
 
