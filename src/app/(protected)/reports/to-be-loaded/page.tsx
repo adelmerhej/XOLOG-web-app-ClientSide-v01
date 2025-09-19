@@ -45,7 +45,7 @@ import { exportDataGrid as exportDataGridToXLSX } from "devextreme/excel_exporte
 import DataSource from "devextreme/data/data_source";
 import notify from "devextreme/ui/notify";
 
-import { TobeLoadedJob } from "@/types/TobeLoadedJob";
+import { ITobeLoadedJob } from "@/types/TobeLoadedJob";
 
 const exportFormats = ["xlsx", "pdf"];
 
@@ -63,7 +63,7 @@ export default function TobeLoadedClientReport() {
   const { data: session } = useSession();
 
   const [gridDataSource, setGridDataSource] =
-    useState<DataSource<TobeLoadedJob, string>>();
+    useState<DataSource<ITobeLoadedJob, string>>();
   const [totalProfit, setTotalProfit] = useState<number>(0);
 
   const gridRef = useRef<DataGridRef>(null);

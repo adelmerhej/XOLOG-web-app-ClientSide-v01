@@ -8,7 +8,7 @@ export type StatusList = (typeof JOB_STATUS_LIST)[number];
 
 export type JobStatusDepartments = (typeof JOB_STATUS_DEPARTMENTS)[number];
 
-export interface ITobeLoadedJob extends Document {
+export interface IOnWaterJob extends Document {
   _id: string;
   JobNo: number;
   JobDate?: Date;

@@ -32,7 +32,7 @@ import { exportDataGrid as exportDataGridToXLSX } from 'devextreme/excel_exporte
 import DataSource from 'devextreme/data/data_source';
 import notify from 'devextreme/ui/notify';
 
-import { IOngoingJob } from '@/types/TobeLoadedJob';
+import { IOnWaterJob } from '@/types/OnWaterJob';
 
 const exportFormats = ['xlsx', 'pdf'];
 
@@ -48,7 +48,7 @@ export default function OnWater() {
   // Get auth context for token access (when auth system includes tokens)
   const { user } = useAuth();
 
-  const [gridDataSource, setGridDataSource] = useState<DataSource<IOngoingJob, string>>();
+  const [gridDataSource, setGridDataSource] = useState<DataSource<IOnWaterJob, string>>();
   const [totalProfit, setTotalProfit] = useState<number>(0);
   const [isSyncing, setIsSyncing] = useState(false);
 
