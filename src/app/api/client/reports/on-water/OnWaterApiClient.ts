@@ -1,12 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+'use server';
+
 import { signIn } from '@/app/api/auth';
 
 // Use the same base URL pattern as other clients to avoid env/token mismatches
 const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients`;
-const getData = async(queryString?: string, token?: string) => {
+const getData = async(queryString?: string, token?: string, userId?: number) => {
 
   try {
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    if (userId) {
+      queryParams.set('userId', userId.toString());
+    }
+
+    console.log('queryString', queryString)
+    console.log('userId', userId)
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -23,7 +33,7 @@ const getData = async(queryString?: string, token?: string) => {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch ongoing jobs');
+      throw new Error('Failed to fetch on-water jobs');
     }
 
     const data = await response.json();
@@ -35,7 +45,7 @@ const getData = async(queryString?: string, token?: string) => {
 };
 
 // Client-side function to fetch ongoing jobs (for React components)
-export async function fetchOnWaterData(params: {
+export async function fetchTobeLoadedData(params: {
   page?: number;
   limit?: number;
   jobStatusType?: string;
@@ -44,6 +54,7 @@ export async function fetchOnWaterData(params: {
   statusType?: string;
   departmentId?: number;
   jobType?: number;
+  userId?: number;
 } = {}) {
   try {
     // Build query parameters
@@ -56,6 +67,7 @@ export async function fetchOnWaterData(params: {
     if (params.departmentId) queryParams.set('departmentId', params.departmentId.toString());
     if (params.fullPaid) queryParams.set('fullPaid', params.fullPaid.toString());
     if (params.jobType) queryParams.set('jobType', params.jobType.toString());
+    if (params.userId) queryParams.set('userId', params.userId.toString());
 
     // Get the query string
     const queryString = queryParams.toString();
@@ -68,14 +80,17 @@ export async function fetchOnWaterData(params: {
     }
 
     params.token = token;
-    const data = await getData(queryString, params.token);
+
+    console.log("params", params)
+    
+     const data = await getData(queryString, params.token, params.userId);
 
     // Return the data directly - assuming the API returns the expected format
 
     return data || data || [];
 
   } catch (error: unknown) {
-    console.error('Error fetching ongoing jobs:', error);
+    console.error('Error fetching on-water jobs:', error);
 
     throw error;
   }

@@ -33,7 +33,7 @@ const getData = async(queryString?: string, token?: string, userId?: number) => 
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch ongoing jobs');
+      throw new Error('Failed to fetch to be loaded jobs');
     }
 
     const data = await response.json();
@@ -90,7 +90,7 @@ export async function fetchTobeLoadedData(params: {
     return data || data || [];
 
   } catch (error: unknown) {
-    console.error('Error fetching ongoing jobs:', error);
+    console.error('Error fetching to be loaded jobs:', error);
 
     throw error;
   }
