@@ -45,7 +45,7 @@ import { exportDataGrid as exportDataGridToXLSX } from "devextreme/excel_exporte
 import DataSource from "devextreme/data/data_source";
 import notify from "devextreme/ui/notify";
 
-import { IOnWaterJob } from '@/types/OnWaterJob';
+import { ITobeLoadedJob } from "@/types/TobeLoadedJob";
 
 const exportFormats = ["xlsx", "pdf"];
 
@@ -63,13 +63,13 @@ export default function TobeLoadedClientReport() {
   const { data: session } = useSession();
 
   const [gridDataSource, setGridDataSource] =
-    useState<DataSource<IOnWaterJob, string>>();
+    useState<DataSource<ITobeLoadedJob, string>>();
   const [totalProfit, setTotalProfit] = useState<number>(0);
 
   const gridRef = useRef<DataGridRef>(null);
 
   // Helper function to load "To Be Loaded" data specifically
-  const loadOnWaterData = useCallback(async () => {
+  const loadToBeLoadedData = useCallback(async () => {
     // If user not authenticated yet, don't call the API
 
     const params: {
@@ -113,10 +113,10 @@ export default function TobeLoadedClientReport() {
     setGridDataSource(
       new DataSource({
         key: "_id",
-        load: loadOnWaterData,
+        load: loadToBeLoadedData,
       })
     );
-  }, [loadOnWaterData]);
+  }, [loadToBeLoadedData]);
 
   const refresh = useCallback(() => {
     gridRef.current?.instance().refresh();

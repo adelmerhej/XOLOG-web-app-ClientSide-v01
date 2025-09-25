@@ -48,7 +48,7 @@ import { exportDataGrid as exportDataGridToXLSX } from "devextreme/excel_exporte
 import DataSource from "devextreme/data/data_source";
 import notify from "devextreme/ui/notify";
 
-import { ITobeLoadedJob } from "@/types/TobeLoadedJob";
+import { IOnWaterJob } from '@/types/OnWaterJob';
 
 const exportFormats = ["xlsx", "pdf"];
 
@@ -60,19 +60,19 @@ const formatCurrency = (amount: number): string => {
   });
 };
 
-export default function TobeLoadedClientReport() {
+export default function OnWaterClientReport() {
   // Get auth context for token access (when auth system includes tokens)
   const { user } = useAuth();
   const { data: session } = useSession();
 
   const [gridDataSource, setGridDataSource] =
-    useState<DataSource<ITobeLoadedJob, string>>();
+    useState<DataSource<IOnWaterJob, string>>();
   const [totalProfit, setTotalProfit] = useState<number>(0);
 
   const gridRef = useRef<DataGridRef>(null);
 
-  // Helper function to load "To Be Loaded" data specifically
-  const loadToBeLoadedData = useCallback(async () => {
+  // Helper function to load "On Water" data specifically
+  const loadOnWaterData = useCallback(async () => {
     // If user not authenticated yet, don't call the API
 
     const params: {
@@ -84,7 +84,7 @@ export default function TobeLoadedClientReport() {
     } = {
       page: 1,
       limit: 0,
-      jobStatusType: "To Be Loaded", // Filter specifically for "To Be Loaded" status
+      jobStatusType: "On Water", // Filter specifically for "On Water" status
       email: user?.email,
       userId: user?.userId ?? (session?.user?.userId as number | undefined),
       // prefer numeric/string id; fallback to unique email if needed
@@ -101,7 +101,7 @@ export default function TobeLoadedClientReport() {
       }
       return data;
     } catch (error) {
-      console.error("Error loading To Be Loaded data:", error);
+      console.error("Error loading On Water data:", error);
       return [];
     }
   }, [
@@ -116,10 +116,10 @@ export default function TobeLoadedClientReport() {
     setGridDataSource(
       new DataSource({
         key: "_id",
-        load: loadToBeLoadedData,
+        load: loadOnWaterData,
       })
     );
-  }, [loadToBeLoadedData]);
+  }, [loadOnWaterData]);
 
   const refresh = useCallback(() => {
     gridRef.current?.instance().refresh();
@@ -206,11 +206,11 @@ export default function TobeLoadedClientReport() {
         jsPDFDocument: doc,
         component: e.component,
       }).then(() => {
-        doc.save("ToBeLoadedReport.pdf");
+        doc.save("OnWaterReport.pdf");
       });
     } else {
       const workbook = new Workbook();
-      const worksheet = workbook.addWorksheet("ToBeLoadedReport");
+      const worksheet = workbook.addWorksheet("OnWaterReport");
 
       exportDataGridToXLSX({
         component: e.component,
@@ -220,7 +220,7 @@ export default function TobeLoadedClientReport() {
         workbook.xlsx.writeBuffer().then((buffer) => {
           saveAs(
             new Blob([buffer], { type: "application/octet-stream" }),
-            "ToBeLoadedReport.xlsx"
+              "OnWaterReport.xlsx"
           );
         });
       });
@@ -255,7 +255,7 @@ export default function TobeLoadedClientReport() {
             <Paging defaultPageSize={100} />
             <Pager visible showPageSizeSelector />
             <LoadPanel showPane={false} />
-            <SearchPanel visible placeholder="Search To Be Loaded Jobs" />
+            <SearchPanel visible placeholder="Search On Water Jobs" />
             <ColumnChooser enabled />
             <Export enabled allowExportSelectedData formats={exportFormats} />
             <Selection
@@ -268,7 +268,7 @@ export default function TobeLoadedClientReport() {
             <Scrolling mode="virtual" />
             <Toolbar>
               <Item location="before">
-                <div className="grid-header">To Be Loaded Jobs Report</div>
+                <div className="grid-header">On Water Jobs Report</div>
               </Item>
               <Item location="after">
                 <div className="total-profit-display">
