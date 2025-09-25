@@ -37,7 +37,7 @@ const getData = async(queryString?: string, token?: string) => {
 };
 
 // Client-side function to fetch ongoing jobs (for React components)
-export async function fetchUnderClearanceData(params: {
+export async function getUnderClearanceData(params: {
   page?: number;
   limit?: number;
   jobStatusType?: string;
