@@ -45,7 +45,7 @@ const getData = async(queryString?: string, token?: string, userId?: number) => 
 };
 
 // Client-side function to fetch ongoing jobs (for React components)
-export async function fetchTobeLoadedData(params: {
+export async function getTobeLoadedData(params: {
   page?: number;
   limit?: number;
   jobStatusType?: string;

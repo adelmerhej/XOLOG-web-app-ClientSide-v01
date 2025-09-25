@@ -10,7 +10,7 @@ import { Workbook } from "exceljs";
 import AppLayout from "@/components/layout/Layout";
 
 // Import ongoing jobs API
-import { fetchTobeLoadedData } from "@/app/api/client/reports/tobe-loaded/TobeLoadedApiClient";
+import { getTobeLoadedData } from "@/app/api/client/reports/tobe-loaded/TobeLoadedApiClient";
 
 // Import auth context for token access
 import { useAuth } from "@/contexts/auth";
@@ -45,7 +45,7 @@ import { exportDataGrid as exportDataGridToXLSX } from "devextreme/excel_exporte
 import DataSource from "devextreme/data/data_source";
 import notify from "devextreme/ui/notify";
 
-import { ITobeLoadedJob } from "@/types/TobeLoadedJob";
+import { IOnWaterJob } from '@/types/OnWaterJob';
 
 const exportFormats = ["xlsx", "pdf"];
 
@@ -63,13 +63,13 @@ export default function TobeLoadedClientReport() {
   const { data: session } = useSession();
 
   const [gridDataSource, setGridDataSource] =
-    useState<DataSource<ITobeLoadedJob, string>>();
+    useState<DataSource<IOnWaterJob, string>>();
   const [totalProfit, setTotalProfit] = useState<number>(0);
 
   const gridRef = useRef<DataGridRef>(null);
 
   // Helper function to load "To Be Loaded" data specifically
-  const loadToBeLoadedData = useCallback(async () => {
+  const loadOnWaterData = useCallback(async () => {
     // If user not authenticated yet, don't call the API
 
     const params: {
@@ -89,7 +89,7 @@ export default function TobeLoadedClientReport() {
     };
 
     try {
-      const data = await fetchTobeLoadedData(params);
+      const data = await getTobeLoadedData(params);
       // If API response has a totalProfit field, use it for accurate total
       if (data && typeof data === "object" && "totalProfit" in data) {
         setTotalProfit(data.totalProfit || 0);
@@ -113,10 +113,10 @@ export default function TobeLoadedClientReport() {
     setGridDataSource(
       new DataSource({
         key: "_id",
-        load: loadToBeLoadedData,
+        load: loadOnWaterData,
       })
     );
-  }, [loadToBeLoadedData]);
+  }, [loadOnWaterData]);
 
   const refresh = useCallback(() => {
     gridRef.current?.instance().refresh();
