@@ -14,7 +14,10 @@ import {
 } from '@/app/api/client/reports/client-invoice/clientInvoiceApi';
 
 // Import auth context for token access
-import { useAuth } from '../../../../contexts/auth';
+//import { useAuth } from '../../../../contexts/auth';
+// Import auth context for token access
+import { useAuth } from "@/contexts/auth";
+import { useSession } from "next-auth/react";
 
 import {
   DataGrid, DataGridRef,
@@ -98,35 +101,58 @@ const onExporting = (e: DataGridTypes.ExportingEvent) => {
 
 export default function InvoiceStatusClientReport() {
 const [gridDataSource, setGridDataSource] = useState<DataSource<IClientInvoice, string>>();
+  const { user } = useAuth();
+  const { data: session } = useSession()
+
   const gridRef = useRef<DataGridRef>(null);
   const [totalProfit, setTotalProfit] = useState<number>(0);
   const [totalInvoice, setTotalInvoice] = useState<number>(0);
   const [isSyncing, setIsSyncing] = useState(false);
-
+  
   const refresh = useCallback(() => {
     gridRef.current?.instance().refresh();
   }, []);
 
   // Helper function to load data - no filters applied
   const loadInvoiceStatusData = useCallback(async() => {
+    // If user not authenticated yet, don't call the API
+
     const params: {
       page: number;
       limit: number;
+      jobStatusType?: string;
+      userId?: number;
+      email?: string;
     } = {
       page: 1,
       limit: 0,
+      jobStatusType: "Invoice Status", // Filter specifically for "On Water" status
+      email: user?.email,
+      userId: user?.userId ?? (session?.user?.userId as number | undefined),
+      // prefer numeric/string id; fallback to unique email if needed
+      // userId: user.userId ?? user.email, // prefer numeric/string id; fallback to unique email if needed
     };
 
-    console.log('Loading invoice status with params:', params);
-
     try {
-      const clientInvoices = await fetchClientInvoices(params);
-      return clientInvoices as IClientInvoice[];
+      const data = await fetchClientInvoices(params);
+      // If API response has a totalProfit field, use it for accurate total
+      if (data && typeof data === "object" && "totalProfit" in data) {
+        setTotalProfit(data.totalProfit || 0);
+        // Return the actual data array
+        return data.data || data || [];
+      }
+      return data;
     } catch (error) {
-      console.error('Error loading invoice status:', error);
+      console.error("Error loading On Water data:", error);
       return [];
     }
-  }, []);
+  }, [
+    user?.token,
+    user?.userId,
+    user?.email,
+    session?.user?.userId,
+    session?.user?.apiToken,
+  ]);
 
   useEffect(() => {
     loadInvoiceStatusData();
