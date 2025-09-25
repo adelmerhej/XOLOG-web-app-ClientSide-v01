@@ -10,7 +10,7 @@ import AppLayout from '@/components/layout/Layout';
 
 // Import OnWater jobs API
 import {
-  fetchOnWaterData,
+  getOnWaterData,
 
 } from '@/app/api/client/reports/on-water/OnWaterApiClient';
 
@@ -67,7 +67,7 @@ export default function OnWater() {
     };
 
     try {
-      const data = await fetchOnWaterData(params);
+      const data = await getOnWaterData(params);
       // If API response has a totalProfit field, use it for accurate total
       if (data && typeof data === 'object' && 'totalProfit' in data) {
         setTotalProfit(data.totalProfit || 0);
