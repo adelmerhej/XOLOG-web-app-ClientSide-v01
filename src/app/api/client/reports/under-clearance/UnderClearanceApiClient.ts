@@ -15,8 +15,6 @@ const getData = async(queryString?: string, token?: string, userId?: number) => 
       queryParams.set('userId', userId.toString());
     }
 
-    console.log('queryString', queryString)
-
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
