@@ -114,49 +114,52 @@ const [gridDataSource, setGridDataSource] = useState<DataSource<IClientInvoice, 
   }, []);
 
   // Helper function to load data - no filters applied
-  const loadInvoiceStatusData = useCallback(async() => {
-    // If user not authenticated yet, don't call the API
+  const loadInvoiceStatusData = useCallback(async () => {
+    const resolvedUserId = user?.userId ?? (session?.user?.userId as number | undefined);
+    const resolvedEmail = user?.email ?? (session?.user?.email as string | undefined);
 
-    const params: {
-      page: number;
-      limit: number;
-      jobStatusType?: string;
-      userId?: number;
-      email?: string;
-    } = {
+    // Avoid calling API until user info is available
+    if (!resolvedUserId && !resolvedEmail) {
+      return [];
+    }
+
+    const params = {
       page: 1,
       limit: 0,
-      jobStatusType: "Invoice Status", // Filter specifically for "On Water" status
-      email: user?.email,
-      userId: user?.userId ?? (session?.user?.userId as number | undefined),
-      // prefer numeric/string id; fallback to unique email if needed
-      // userId: user.userId ?? user.email, // prefer numeric/string id; fallback to unique email if needed
+      jobStatusType: "Invoice Status",
+      email: resolvedEmail,
+      userId: resolvedUserId,
     };
 
     try {
+      console.log('params', params);
       const data = await fetchClientInvoices(params);
-      // If API response has a totalProfit field, use it for accurate total
-      if (data && typeof data === "object" && "totalProfit" in data) {
-        setTotalProfit(data.totalProfit || 0);
-        // Return the actual data array
-        return data.data || data || [];
-      }
-      return data;
+
+      const rows: IClientInvoice[] = (data && typeof data === "object" && "data" in data)
+        ? (data.data as IClientInvoice[])
+        : (Array.isArray(data) ? (data as IClientInvoice[]) : []);
+
+      // Update totals based on response (either from API or computed)
+      const computedTotalInvoice = rows.reduce((sum, item) => sum + (item.TotalInvoices || 0), 0);
+      const computedTotalProfit = (data && typeof data === "object" && "totalProfit" in data)
+        ? (data.totalProfit || 0)
+        : rows.reduce((sum, item) => sum + (item.TotalProfit || 0), 0);
+
+      setTotalInvoice(computedTotalInvoice);
+      setTotalProfit(computedTotalProfit);
+
+      return rows;
     } catch (error) {
-      console.error("Error loading On Water data:", error);
+      console.error("Error loading Invoice Status data:", error);
       return [];
     }
   }, [
-    user?.token,
     user?.userId,
     user?.email,
     session?.user?.userId,
-    session?.user?.apiToken,
+    session?.user?.email,
   ]);
 
-  useEffect(() => {
-    loadInvoiceStatusData();
-  }, [loadInvoiceStatusData]);
 
   useEffect(() => {
     const dataSource = new DataSource({
@@ -167,17 +170,6 @@ const [gridDataSource, setGridDataSource] = useState<DataSource<IClientInvoice, 
     setGridDataSource(dataSource);
   }, [loadInvoiceStatusData]);
 
-  // Calculate total profit when grid data changes
-  useEffect(() => {
-    if (gridDataSource) {
-      gridDataSource.load().then((data: IClientInvoice[]) => {
-        const totalInvoice = data.reduce((sum, item) => sum + (item.TotalInvoices || 0), 0);
-        const totalProfit = data.reduce((sum, item) => sum + (item.TotalProfit || 0), 0);
-        setTotalInvoice(totalInvoice);
-        setTotalProfit(totalProfit);
-      });
-    }
-  }, [gridDataSource]);
 
   const refreshOnClick = useCallback(() => {
     // Refresh data with current parameters
