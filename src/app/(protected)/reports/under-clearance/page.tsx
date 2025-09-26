@@ -149,9 +149,9 @@ export default function UnderClearanceClientReport() {
   ) => {
     const spaceReleasedValue = cell.data.SpaceReleased;
 
-    // Debug: Log the actual value and the entire data object to console
-    // console.log('Full cell data:', cell.data);
-    // console.log('SpaceReleased value:', spaceReleasedValue, 'Type:', typeof spaceReleasedValue);
+    //Debug: Log the actual value and the entire data object to console
+    console.log('Full cell data:', cell.data);
+    console.log('SpaceReleased value:', spaceReleasedValue, 'Type:', typeof spaceReleasedValue);
 
     // Handle different data types that might represent boolean values
     let isReleased = false;
