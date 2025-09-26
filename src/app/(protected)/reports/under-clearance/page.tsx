@@ -87,9 +87,10 @@ export default function UnderClearanceClientReport() {
       // prefer numeric/string id; fallback to unique email if needed
       // userId: user.userId ?? user.email, // prefer numeric/string id; fallback to unique email if needed
     };
-
+    
     try {
       const data = await getUnderClearanceData(params);
+
       // If API response has a totalProfit field, use it for accurate total
       if (data && typeof data === "object" && "totalProfit" in data) {
         setTotalProfit(data.totalProfit || 0);

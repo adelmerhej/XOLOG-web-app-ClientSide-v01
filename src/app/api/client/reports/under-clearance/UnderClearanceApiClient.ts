@@ -16,7 +16,6 @@ const getData = async(queryString?: string, token?: string, userId?: number) => 
     }
 
     console.log('queryString', queryString)
-    console.log('userId', userId)
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -33,7 +32,7 @@ const getData = async(queryString?: string, token?: string, userId?: number) => 
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch to be under clearance jobs');
+      throw new Error('Failed to fetch Under Clearance jobs');
     }
 
     const data = await response.json();
@@ -90,7 +89,7 @@ export async function getUnderClearanceData(params: {
     return data || data || [];
 
   } catch (error: unknown) {
-    console.error('Error fetching to be under clearance jobs:', error);
+    console.error('Error fetching to be loaded jobs:', error);
 
     throw error;
   }
