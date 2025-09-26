@@ -9,11 +9,8 @@ import { Workbook } from "exceljs";
 
 import AppLayout from "@/components/layout/Layout";
 
-// Import Under Clearance jobs API
-import {
-  getUnderClearanceData,
-
-} from '@/app/api/client/reports/under-clearance/UnderClearanceApiClient';
+// Import ongoing jobs API
+import { getUnderClearanceData } from "@/app/api/client/reports/under-clearance/UnderClearanceApiClient";
 
 // Import auth context for token access
 import { useAuth } from "@/contexts/auth";
@@ -48,7 +45,7 @@ import { exportDataGrid as exportDataGridToXLSX } from "devextreme/excel_exporte
 import DataSource from "devextreme/data/data_source";
 import notify from "devextreme/ui/notify";
 
-import { IUnderClearanceJob } from '@/types/UnderClearance';
+import { IUnderClearanceJob } from "@/types/UnderClearance";
 
 const exportFormats = ["xlsx", "pdf"];
 
@@ -149,9 +146,9 @@ export default function UnderClearanceClientReport() {
   ) => {
     const spaceReleasedValue = cell.data.SpaceReleased;
 
-    //Debug: Log the actual value and the entire data object to console
-    console.log('Full cell data:', cell.data);
-    console.log('SpaceReleased value:', spaceReleasedValue, 'Type:', typeof spaceReleasedValue);
+    // Debug: Log the actual value and the entire data object to console
+    // console.log('Full cell data:', cell.data);
+    // console.log('SpaceReleased value:', spaceReleasedValue, 'Type:', typeof spaceReleasedValue);
 
     // Handle different data types that might represent boolean values
     let isReleased = false;
@@ -220,7 +217,7 @@ export default function UnderClearanceClientReport() {
         workbook.xlsx.writeBuffer().then((buffer) => {
           saveAs(
             new Blob([buffer], { type: "application/octet-stream" }),
-              "UnderClearanceReport.xlsx"
+            "UnderClearanceReport.xlsx"
           );
         });
       });
