@@ -26,7 +26,6 @@ if (typeof document !== "undefined") {
 }
 
 // Importing data fetching function
-//import { fetchTotalProfits, syncTotalProfitData } from '../../api/dx-xolog-data/admin/reports/total-profit/totalProfitApiClient';
 import {
   getTobeLoadedData,
   syncTobeLoadedData,
