@@ -125,13 +125,13 @@ export async function syncTobeLoadedData() {
     );
 
     if (!response.ok) {
-      throw new Error('Failed to sync sync Total Profit');
+      throw new Error('Failed to sync to be loaded');
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error syncing Total Profit:', error);
+    console.error('Error syncing to be loaded:', error);
     throw error;
   }
 }
