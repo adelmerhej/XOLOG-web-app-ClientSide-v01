@@ -63,7 +63,7 @@ const formatCurrency = (amount: number): string => {
 
 export default function TobeLoadedClientReport() {
   // Get auth context for token access (when auth system includes tokens)
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const [gridDataSource, setGridDataSource] = useState<DataSource<ITobeLoadedJob, string>>();
   const [totalProfit, setTotalProfit] = useState<number>(0);
@@ -71,16 +71,26 @@ export default function TobeLoadedClientReport() {
 
   const gridRef = useRef<DataGridRef>(null);
 
+  console.debug('[TobeLoadedClientReport] render', { hasUser: !!user, loading });
+
   // Helper function to load "To Be Loaded" data specifically
   const loadToBeLoadedData = useCallback(async() => {
+    // Avoid firing request while auth still loading
+    if (loading) {
+      return [];
+    }
     const params: {
       page: number;
       limit: number;
       jobStatusType?: string;
+      token?: string;
+      userId?: number;
     } = {
       page: 1,
       limit: 0,
       jobStatusType: 'To Be Loaded', // Filter specifically for "To Be Loaded" status
+      token: user?.token, // prefer token from auth context if available
+      userId: user?.userId,
     };
 
     try {
@@ -96,14 +106,16 @@ export default function TobeLoadedClientReport() {
       console.error('Error loading To Be Loaded data:', error);
       return [];
     }
-  }, []);
+  }, [user, loading]);
 
   useEffect(() => {
-    setGridDataSource(new DataSource({
-      key: '_id',
-      load: loadToBeLoadedData,
-    }));
-  }, [loadToBeLoadedData]);
+    if (!loading) {
+      setGridDataSource(new DataSource({
+        key: '_id',
+        load: loadToBeLoadedData,
+      }));
+    }
+  }, [loadToBeLoadedData, loading]);
 
   const syncAndUpdateData = useCallback(async() => {
     setIsSyncing(true);
@@ -206,6 +218,11 @@ export default function TobeLoadedClientReport() {
       e.cancel = true;
     }
   };
+
+  // Optional simple loading placeholder
+  if (loading) {
+    return <div style={{ padding: 24 }}>Initializing report...</div>;
+  }
 
   return (
     <AppLayout>

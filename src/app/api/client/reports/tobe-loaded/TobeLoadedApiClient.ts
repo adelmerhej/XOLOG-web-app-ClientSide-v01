@@ -42,11 +42,11 @@ const getData = async(queryString?: string, token?: string, userId?: number) => 
 };
 
 // Client-side function to fetch ongoing jobs (for React components)
-export async function getTobeLoadedData(params: {
+export async function getTobeLoadedData(rawParams: {
   page?: number;
   limit?: number;
   jobStatusType?: string;
-  token?: string;
+  token?: string; // optional caller-provided token
   fullPaid?: string;
   statusType?: string;
   departmentId?: number;
@@ -54,41 +54,42 @@ export async function getTobeLoadedData(params: {
   userId?: number;
 } = {}) {
   try {
+    // Create a shallow copy so we don't mutate caller's object
+    const params = { ...rawParams };
+
     // Build query parameters
     const queryParams = new URLSearchParams();
-
-    if (params.page) queryParams.set('page', params.page.toString());
-    if (params.limit) queryParams.set('limit', params.limit.toString());
+    if (params.page !== undefined) queryParams.set('page', params.page.toString());
+    if (params.limit !== undefined) queryParams.set('limit', params.limit.toString());
     if (params.jobStatusType) queryParams.set('jobStatusType', params.jobStatusType);
     if (params.statusType) queryParams.set('statusType', params.statusType);
-    if (params.departmentId) queryParams.set('departmentId', params.departmentId.toString());
+    if (params.departmentId !== undefined) queryParams.set('departmentId', params.departmentId.toString());
     if (params.fullPaid) queryParams.set('fullPaid', params.fullPaid.toString());
-    if (params.jobType) queryParams.set('jobType', params.jobType.toString());
-    if (params.userId) queryParams.set('userId', params.userId.toString());
+    if (params.jobType !== undefined) queryParams.set('jobType', params.jobType.toString());
+    if (params.userId !== undefined) queryParams.set('userId', params.userId.toString());
 
-    // Get the query string
-    const queryString = queryParams.toString();
-
-    // Use the getData function to fetch all Job Status from MongoDB
-    const signInResult = await signIn('admin@xolog.com', 'Admin@Xolog#16');
-    let token: string | undefined = undefined;
-    if (signInResult && signInResult.isOk && signInResult.data && signInResult.data.token) {
-      token = signInResult.data.token;
+    // Only perform sign-in if no token provided
+    let token = params.token;
+    if (!token) {
+      const signInResult = await signIn('admin@xolog.com', 'Admin@Xolog#16');
+      if (signInResult?.isOk && signInResult.data?.token) {
+        token = signInResult.data.token;
+      }
     }
 
-    params.token = token;
+    if (!token) {
+      console.warn('[getTobeLoadedData] No auth token available; request will proceed without Authorization header.');
+    }
 
-    console.log("params", params)
-    
-     const data = await getData(queryString, params.token, params.userId);
+    const queryString = queryParams.toString();
 
-    // Return the data directly - assuming the API returns the expected format
+    // Log minimal safe params (omit potentially large arrays / token value)
+    console.debug('[getTobeLoadedData] Fetching with params', { ...params, token: token ? '[redacted]' : undefined });
 
-    return data || data || [];
-
+    const data = await getData(queryString, token, params.userId);
+    return data || [];
   } catch (error: unknown) {
     console.error('Error fetching to be loaded jobs:', error);
-
     throw error;
   }
 }

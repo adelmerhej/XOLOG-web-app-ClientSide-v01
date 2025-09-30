@@ -20,6 +20,7 @@ function AuthProvider(props: React.PropsWithChildren<unknown>) {
   const signIn = useCallback(async(email: string, password: string) => {
     const result = await sendSignInRequest(email, password);
     if (result.isOk) {
+      console.log('Sign-in successful, setting user:', result.data);
       setUser(result.data);
     }
 
