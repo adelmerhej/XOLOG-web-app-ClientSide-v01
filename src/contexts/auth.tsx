@@ -1,40 +1,54 @@
-import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { getUser, signIn as sendSignInRequest } from '@/app/api/auth';
-import type { User, AuthContextType } from '@/utils/types';
+"use client";
+import React, { createContext, useContext, useMemo, useCallback } from 'react';
+import { signIn as nextAuthSignIn, signOut as nextAuthSignOut, useSession } from 'next-auth/react';
+import type { AuthContextType, User } from '@/utils/types';
+
+// Backward compatible context using next-auth session underneath
+const AuthContext = createContext<AuthContextType>({ loading: false } as AuthContextType);
 
 function AuthProvider(props: React.PropsWithChildren<unknown>) {
-  const [user, setUser] = useState<User>();
-  const [loading, setLoading] = useState(true);
+  const { data: session, status } = useSession();
 
-  useEffect(() => {
-    (async function() {
-      const result = await getUser();
-      if (result.isOk) {
-        setUser(result.data);
-      }
-
-      setLoading(false);
-    })();
-  }, []);
+  const loading = status === 'loading';
+  // Map next-auth session.user to legacy User type
+  const mappedUser: User | undefined = useMemo(() => {
+    if (!session?.user) return undefined;
+    return {
+      name: session.user.name || '',
+      email: session.user.email || '',
+      token: (session.user as { apiToken?: string }).apiToken || (session.user as { token?: string }).token,
+      userId: (session.user as { userId?: number }).userId,
+      avatarUrl: '/user.jpg', // could be extended later
+    };
+  }, [session]);
 
   const signIn = useCallback(async(email: string, password: string) => {
-    const result = await sendSignInRequest(email, password);
-    if (result.isOk) {
-      console.log('Sign-in successful, setting user:', result.data);
-      setUser(result.data);
+    // Delegate to next-auth credentials provider
+    const result = await nextAuthSignIn('credentials', {
+      redirect: false,
+      identifier: email,
+      password,
+    });
+    if (result?.error) {
+      return { isOk: false, message: result.error };
     }
-
-    return result;
-  }, []);
+    return { isOk: true, data: mappedUser };
+  }, [mappedUser]);
 
   const signOut = useCallback(() => {
-    setUser(undefined);
+    void nextAuthSignOut({ redirect: false });
   }, []);
 
-  return <AuthContext.Provider value={{ user, signIn, signOut, loading }} {...props} />;
+  const value: AuthContextType = useMemo(() => ({
+    user: mappedUser,
+    signIn,
+    signOut,
+    loading,
+  }), [mappedUser, signIn, signOut, loading]);
+
+  return <AuthContext.Provider value={value} {...props} />;
 }
 
-const AuthContext = createContext<AuthContextType>({ loading: false } as AuthContextType);
 const useAuth = () => useContext(AuthContext);
 
-export { AuthProvider, useAuth };
+export { AuthProvider, useAuth }; 

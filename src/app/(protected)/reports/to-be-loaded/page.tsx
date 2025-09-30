@@ -71,8 +71,6 @@ export default function TobeLoadedClientReport() {
 
   const gridRef = useRef<DataGridRef>(null);
 
-  console.debug('[TobeLoadedClientReport] render', { hasUser: !!user, loading });
-
   // Helper function to load "To Be Loaded" data specifically
   const loadToBeLoadedData = useCallback(async() => {
     // Avoid firing request while auth still loading
@@ -89,12 +87,13 @@ export default function TobeLoadedClientReport() {
       page: 1,
       limit: 0,
       jobStatusType: 'To Be Loaded', // Filter specifically for "To Be Loaded" status
-      token: user?.token, // prefer token from auth context if available
+      token: user?.token || (user as unknown as { apiToken?: string })?.apiToken, // prefer apiToken then legacy token
       userId: user?.userId,
     };
 
     try {
       const data = await getTobeLoadedData(params);
+
       // If API response has a totalProfit field, use it for accurate total
       if (data && typeof data === 'object' && 'totalProfit' in data) {
         setTotalProfit(data.totalProfit || 0);
@@ -157,10 +156,6 @@ export default function TobeLoadedClientReport() {
 
   const cellSpaceReleasedRender = (cell: DataGridTypes.ColumnCellTemplateData) => {
     const spaceReleasedValue = cell.data.SpaceReleased;
-
-    // Debug: Log the actual value and the entire data object to console
-    console.log('Full cell data:', cell.data);
-    console.log('SpaceReleased value:', spaceReleasedValue, 'Type:', typeof spaceReleasedValue);
 
     // Handle different data types that might represent boolean values
     let isReleased = false;

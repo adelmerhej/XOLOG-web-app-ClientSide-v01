@@ -6,8 +6,8 @@ import { signIn } from '@/app/api/auth';
 
 // Use the same base URL pattern as other clients to avoid env/token mismatches
 const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients`;
-const getData = async(queryString?: string, token?: string, userId?: number) => {
 
+const getData = async(queryString?: string, token?: string, userId?: number) => {
   try {
     // Build query parameters
     const queryParams = new URLSearchParams();
@@ -23,7 +23,7 @@ const getData = async(queryString?: string, token?: string, userId?: number) => 
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
-
+   
     const response = await fetch(`${baseUrl}/to-be-loaded${queryString ? `?${queryString}` : ''}`, {
       method: 'GET',
       headers: headers,
@@ -34,7 +34,6 @@ const getData = async(queryString?: string, token?: string, userId?: number) => 
     }
 
     const data = await response.json();
-
     return data;
 
   } catch (error) { /* empty */ }
@@ -69,14 +68,8 @@ export async function getTobeLoadedData(rawParams: {
     if (params.userId !== undefined) queryParams.set('userId', params.userId.toString());
 
     // Only perform sign-in if no token provided
-    let token = params.token;
-    if (!token) {
-      const signInResult = await signIn('admin@xolog.com', 'Admin@Xolog#16');
-      if (signInResult?.isOk && signInResult.data?.token) {
-        token = signInResult.data.token;
-      }
-    }
-
+    const token = params.token;
+    
     if (!token) {
       console.warn('[getTobeLoadedData] No auth token available; request will proceed without Authorization header.');
     }
@@ -84,9 +77,10 @@ export async function getTobeLoadedData(rawParams: {
     const queryString = queryParams.toString();
 
     // Log minimal safe params (omit potentially large arrays / token value)
-    console.debug('[getTobeLoadedData] Fetching with params', { ...params, token: token ? '[redacted]' : undefined });
+    //console.debug('[getTobeLoadedData] Fetching with params', { ...params, token: token ? '[redacted]' : undefined });
 
     const data = await getData(queryString, token, params.userId);
+
     return data || [];
   } catch (error: unknown) {
     console.error('Error fetching to be loaded jobs:', error);
