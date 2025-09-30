@@ -6,8 +6,8 @@ import { signIn } from '@/app/api/auth';
 
 // Use the same base URL pattern as other clients to avoid env/token mismatches
 const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients`;
-const getData = async(queryString?: string, token?: string, userId?: number) => {
 
+const getData = async(queryString?: string, token?: string, userId?: number) => {
   try {
     // Build query parameters
     const queryParams = new URLSearchParams();
@@ -23,18 +23,17 @@ const getData = async(queryString?: string, token?: string, userId?: number) => 
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
-
+   
     const response = await fetch(`${baseUrl}/on-water${queryString ? `?${queryString}` : ''}`, {
       method: 'GET',
       headers: headers,
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch on-water jobs');
+      throw new Error('Failed to fetch on water jobs');
     }
 
     const data = await response.json();
-
     return data;
 
   } catch (error) { /* empty */ }
@@ -42,11 +41,11 @@ const getData = async(queryString?: string, token?: string, userId?: number) => 
 };
 
 // Client-side function to fetch ongoing jobs (for React components)
-export async function getOnWaterData(params: {
+export async function getOnWaterData(rawParams: {
   page?: number;
   limit?: number;
   jobStatusType?: string;
-  token?: string;
+  token?: string; // optional caller-provided token
   fullPaid?: string;
   statusType?: string;
   departmentId?: number;
@@ -54,41 +53,81 @@ export async function getOnWaterData(params: {
   userId?: number;
 } = {}) {
   try {
+    // Create a shallow copy so we don't mutate caller's object
+    const params = { ...rawParams };
+
     // Build query parameters
     const queryParams = new URLSearchParams();
-
-    if (params.page) queryParams.set('page', params.page.toString());
-    if (params.limit) queryParams.set('limit', params.limit.toString());
+    if (params.page !== undefined) queryParams.set('page', params.page.toString());
+    if (params.limit !== undefined) queryParams.set('limit', params.limit.toString());
     if (params.jobStatusType) queryParams.set('jobStatusType', params.jobStatusType);
     if (params.statusType) queryParams.set('statusType', params.statusType);
-    if (params.departmentId) queryParams.set('departmentId', params.departmentId.toString());
+    if (params.departmentId !== undefined) queryParams.set('departmentId', params.departmentId.toString());
     if (params.fullPaid) queryParams.set('fullPaid', params.fullPaid.toString());
-    if (params.jobType) queryParams.set('jobType', params.jobType.toString());
-    if (params.userId) queryParams.set('userId', params.userId.toString());
+    if (params.jobType !== undefined) queryParams.set('jobType', params.jobType.toString());
+    if (params.userId !== undefined) queryParams.set('userId', params.userId.toString());
 
-    // Get the query string
-    const queryString = queryParams.toString();
-
-    // Use the getData function to fetch all Job Status from MongoDB
-    const signInResult = await signIn('admin@xolog.com', 'Admin@Xolog#16');
-    let token: string | undefined = undefined;
-    if (signInResult && signInResult.isOk && signInResult.data && signInResult.data.token) {
-      token = signInResult.data.token;
+    // Only perform sign-in if no token provided
+    const token = params.token;
+    
+    if (!token) {
+      console.warn('[getTobeLoadedData] No auth token available; request will proceed without Authorization header.');
     }
 
-    params.token = token;
+    const queryString = queryParams.toString();
 
-    console.log("params", params)
-    
-     const data = await getData(queryString, params.token, params.userId);
+    // Log minimal safe params (omit potentially large arrays / token value)
+    //console.debug('[getTobeLoadedData] Fetching with params', { ...params, token: token ? '[redacted]' : undefined });
 
-    // Return the data directly - assuming the API returns the expected format
+    const data = await getData(queryString, token, params.userId);
 
-    return data || data || [];
-
+    return data || [];
   } catch (error: unknown) {
-    console.error('Error fetching on-water jobs:', error);
-
+    console.error('Error fetching on water jobs:', error);
     throw error;
   }
 }
+
+export async function syncOnWaterData() {
+  try {
+    // Use the getData function to fetch all Client Invoices from MongoDB
+    const signInResult = await signIn('admin@xolog.com', 'Admin@Xolog#16');
+    let token: string | undefined = undefined;
+    if (
+      signInResult &&
+      signInResult.isOk &&
+      signInResult.data &&
+      signInResult.data.token
+    ) {
+      token = signInResult.data.token;
+    }
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add Authorization header if token is provided
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/api/v1/sync/sync-on-water`,
+      {
+        method: 'POST',
+        headers: headers,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to sync on water data');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error syncing on water data:', error);
+    throw error;
+  }
+}
+

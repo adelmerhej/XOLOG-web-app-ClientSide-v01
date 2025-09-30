@@ -26,12 +26,13 @@ if (typeof document !== 'undefined') {
   styleElement.textContent = spinningStyles;
   document.head.appendChild(styleElement);
 }
+import AppLayout from "@/components/layout/Layout";
 
 // Import ongoing jobs API
 import { getTobeLoadedData, syncTobeLoadedData } from "@/app/api/client/reports/tobe-loaded/TobeLoadedApiClient";
 
 // Import auth context for token access
-import { useAuth } from '../../../../contexts/auth';
+import { useAuth } from "@/contexts/auth";
 
 import {
   DataGrid, DataGridRef,
@@ -49,7 +50,6 @@ import DataSource from 'devextreme/data/data_source';
 import notify from 'devextreme/ui/notify';
 
 import { ITobeLoadedJob } from "@/types/TobeLoadedJob";
-import AppLayout from '@/components/layout/Layout';
 
 const exportFormats = ['xlsx', 'pdf'];
 

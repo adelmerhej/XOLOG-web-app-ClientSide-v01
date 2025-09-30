@@ -1,4 +1,5 @@
 "use client";
+
 import React, { createContext, useContext, useMemo, useCallback } from 'react';
 import { signIn as nextAuthSignIn, signOut as nextAuthSignOut, useSession } from 'next-auth/react';
 import type { AuthContextType, User } from '@/utils/types';
