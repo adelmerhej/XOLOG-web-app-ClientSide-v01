@@ -57,9 +57,9 @@ const cellTotalInvoicesRender = (cell: DataGridTypes.ColumnCellTemplateData) => 
   <span>${cell.data.TotalInvoices?.toFixed(2) || '0.00'}</span>
 );
 
-const cellProfitRender = (cell: DataGridTypes.ColumnCellTemplateData) => (
-  <span>${cell.data.TotalProfit?.toFixed(2) || '0.00'}</span>
-);
+// const cellProfitRender = (cell: DataGridTypes.ColumnCellTemplateData) => (
+//   <span>${cell.data.TotalProfit?.toFixed(2) || '0.00'}</span>
+// );
 
 const cellNameRender = (cell: DataGridTypes.ColumnCellTemplateData) => (
   <div className='name-template'>
@@ -105,7 +105,7 @@ const [gridDataSource, setGridDataSource] = useState<DataSource<IClientInvoice, 
   const { data: session } = useSession()
 
   const gridRef = useRef<DataGridRef>(null);
-  const [totalProfit, setTotalProfit] = useState<number>(0);
+  // const [totalProfit, setTotalProfit] = useState<number>(0);
   const [totalInvoice, setTotalInvoice] = useState<number>(0);
   const [isSyncing, setIsSyncing] = useState(false);
   
@@ -141,12 +141,12 @@ const [gridDataSource, setGridDataSource] = useState<DataSource<IClientInvoice, 
 
       // Update totals based on response (either from API or computed)
       const computedTotalInvoice = rows.reduce((sum, item) => sum + (item.TotalInvoices || 0), 0);
-      const computedTotalProfit = (data && typeof data === "object" && "totalProfit" in data)
-        ? (data.totalProfit || 0)
-        : rows.reduce((sum, item) => sum + (item.TotalProfit || 0), 0);
+      // const computedTotalProfit = (data && typeof data === "object" && "totalProfit" in data)
+      //   ? (data.totalProfit || 0)
+      //   : rows.reduce((sum, item) => sum + (item.TotalProfit || 0), 0);
 
       setTotalInvoice(computedTotalInvoice);
-      setTotalProfit(computedTotalProfit);
+      //setTotalProfit(computedTotalProfit);
 
       return rows;
     } catch (error) {
@@ -231,9 +231,9 @@ const [gridDataSource, setGridDataSource] = useState<DataSource<IClientInvoice, 
             <Item location='after'>
               <div className='total-profit-display'>Total Invoices: ${formatCurrency(totalInvoice)} &nbsp;&nbsp;&nbsp;&nbsp;</div>
             </Item>
-            <Item location='after'>
+            {/* <Item location='after'>
               <div className='total-profit-display'>Total Profit: ${formatCurrency(totalProfit)} &nbsp;&nbsp;&nbsp;&nbsp;</div>
-            </Item>
+            </Item> */}
 
             <Item
               location='after'
@@ -332,18 +332,6 @@ const [gridDataSource, setGridDataSource] = useState<DataSource<IClientInvoice, 
             }}
           />
           <Column
-            dataField='TotalProfit'
-            caption='Total Profit'
-            dataType='number'
-            format='currency'
-            width={120}
-            customizeText={(data) => {
-              const value = typeof data.value === 'number' ? data.value : 0;
-              const formattedValue = formatCurrency(value);
-              return `${formattedValue}`;
-            }}
-          />
-          <Column
             dataField='Consignee'
             caption='Consignee'
             width={120}
@@ -372,16 +360,6 @@ const [gridDataSource, setGridDataSource] = useState<DataSource<IClientInvoice, 
               column='JobNo'
               summaryType='count'
               displayFormat='{0} jobs'
-            />
-            <GroupItem
-              column='TotalProfit'
-              summaryType='sum'
-              customizeText={(data) => {
-                const value = typeof data.value === 'number' ? data.value : 0;
-                const formattedValue = formatCurrency(value);
-                return `Totals: $${formattedValue}`;
-              }}
-              showInGroupFooter
             />
             <GroupItem
               column='TotalInvoices'

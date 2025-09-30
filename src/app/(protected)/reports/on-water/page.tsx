@@ -67,7 +67,7 @@ export default function OnWaterClientReport() {
 
   const [gridDataSource, setGridDataSource] =
     useState<DataSource<IOnWaterJob, string>>();
-  const [totalProfit, setTotalProfit] = useState<number>(0);
+  //const [totalProfit, setTotalProfit] = useState<number>(0);
 
   const gridRef = useRef<DataGridRef>(null);
 
@@ -94,11 +94,11 @@ export default function OnWaterClientReport() {
     try {
       const data = await getOnWaterData(params);
       // If API response has a totalProfit field, use it for accurate total
-      if (data && typeof data === "object" && "totalProfit" in data) {
-        setTotalProfit(data.totalProfit || 0);
-        // Return the actual data array
-        return data.data || data || [];
-      }
+      // if (data && typeof data === "object" && "totalProfit" in data) {
+      //   setTotalProfit(data.totalProfit || 0);
+      //   // Return the actual data array
+      //   return data.data || data || [];
+      // }
       return data;
     } catch (error) {
       console.error("Error loading On Water data:", error);
@@ -132,9 +132,9 @@ export default function OnWaterClientReport() {
     </div>
   );
 
-  const cellProfitRender = (cell: DataGridTypes.ColumnCellTemplateData) => (
-    <span>${cell.data.TotalProfit?.toFixed(2) || "0.00"}</span>
-  );
+  // const cellProfitRender = (cell: DataGridTypes.ColumnCellTemplateData) => (
+  //   <span>${cell.data.TotalProfit?.toFixed(2) || "0.00"}</span>
+  // );
 
   const cellDateRender = (
     cell: DataGridTypes.ColumnCellTemplateData,
@@ -270,12 +270,12 @@ export default function OnWaterClientReport() {
               <Item location="before">
                 <div className="grid-header">On Water Jobs Report</div>
               </Item>
-              <Item location="after">
+              {/* <Item location="after">
                 <div className="total-profit-display">
                   Total Profit: ${formatCurrency(totalProfit)}{" "}
                   &nbsp;&nbsp;&nbsp;&nbsp;
                 </div>
-              </Item>
+              </Item> */}
               <Item
                 location="after"
                 locateInMenu="auto"
