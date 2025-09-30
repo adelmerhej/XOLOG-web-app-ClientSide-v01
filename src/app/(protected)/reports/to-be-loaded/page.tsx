@@ -279,7 +279,7 @@ export default function TobeLoadedClientReport() {
                 icon='refresh'
                 text='Refresh'
                 stylingMode='text'
-                onClick={refresh}
+                onClick={syncAndUpdateData}
               />
             </Item>
             <Item location='after' locateInMenu='auto'>
