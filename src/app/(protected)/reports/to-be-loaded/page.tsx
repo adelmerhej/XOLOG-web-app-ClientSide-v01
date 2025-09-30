@@ -66,7 +66,7 @@ export default function TobeLoadedClientReport() {
   const { user, loading } = useAuth();
 
   const [gridDataSource, setGridDataSource] = useState<DataSource<ITobeLoadedJob, string>>();
-  const [totalProfit, setTotalProfit] = useState<number>(0);
+  //const [totalProfit, setTotalProfit] = useState<number>(0);
   const [isSyncing, setIsSyncing] = useState(false);
 
   const gridRef = useRef<DataGridRef>(null);
@@ -95,11 +95,12 @@ export default function TobeLoadedClientReport() {
       const data = await getTobeLoadedData(params);
 
       // If API response has a totalProfit field, use it for accurate total
-      if (data && typeof data === 'object' && 'totalProfit' in data) {
-        setTotalProfit(data.totalProfit || 0);
-        // Return the actual data array
-        return data.data || data || [];
-      }
+      // if (data && typeof data === 'object' && 'totalProfit' in data) {
+      //   setTotalProfit(data.totalProfit || 0);
+      //   // Return the actual data array
+      //   return data.data || data || [];
+      // }
+
       return data;
     } catch (error) {
       console.error('Error loading To Be Loaded data:', error);
@@ -145,9 +146,9 @@ export default function TobeLoadedClientReport() {
     </div>
   );
 
-  const cellProfitRender = (cell: DataGridTypes.ColumnCellTemplateData) => (
-    <span>${cell.data.TotalProfit?.toFixed(2) || '0.00'}</span>
-  );
+  // const cellProfitRender = (cell: DataGridTypes.ColumnCellTemplateData) => (
+  //   <span>${cell.data.TotalProfit?.toFixed(2) || '0.00'}</span>
+  // );
 
   const cellDateRender = (cell: DataGridTypes.ColumnCellTemplateData, field: string) => {
     const date = cell.data[field];
@@ -261,9 +262,9 @@ export default function TobeLoadedClientReport() {
             <Item location='before'>
               <div className='grid-header'>To Be Loaded Jobs Report</div>
             </Item>
-            <Item location='after'>
+            {/* <Item location='after'>
               <div className='total-profit-display'>Total Profit: ${formatCurrency(totalProfit)} &nbsp;&nbsp;&nbsp;&nbsp;</div>
-            </Item>
+            </Item> */}
             <Item
               location='after'
               locateInMenu='auto'
@@ -310,11 +311,18 @@ export default function TobeLoadedClientReport() {
             width={100}
           />
           <Column
+            dataField='Mbl'
+            caption='Mbl'
+            dataType='string'
+            width={150}
+          />          
+          <Column
             dataField='ConsigneeName'
             caption='Consignee'
             dataType='string'
             width={250}
             cellRender={cellNameRender}
+            visible={false}
           />
           <Column
             dataField='MemberOf'
@@ -344,6 +352,7 @@ export default function TobeLoadedClientReport() {
             caption='Country Of Destination'
             dataType='string'
             width={100}
+            visible={false}
           />
           <Column
             dataField='Destination'
@@ -352,18 +361,18 @@ export default function TobeLoadedClientReport() {
             width={100}
           />
           <Column
-            dataField='Etd'
+            dataField='ETD'
             caption='ETD'
             dataType='date'
-            width={100}
-            cellRender={(cell) => cellDateRender(cell, 'Etd')}
+            width={110}
+            cellRender={(cell) => cellDateRender(cell, 'ETD')}
           />
           <Column
-            dataField='Eta'
+            dataField='ETA'
             caption='ETA'
             dataType='date'
-            width={100}
-            cellRender={(cell) => cellDateRender(cell, 'Eta')}
+            width={110}
+            cellRender={(cell) => cellDateRender(cell, 'ETA')}
           />
           <Column
             dataField='CarrierName'
