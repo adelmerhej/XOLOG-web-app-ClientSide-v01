@@ -66,7 +66,6 @@ export default function TobeLoadedClientReport() {
   const { user, loading } = useAuth();
 
   const [gridDataSource, setGridDataSource] = useState<DataSource<ITobeLoadedJob, string>>();
-  //const [totalProfit, setTotalProfit] = useState<number>(0);
   const [isSyncing, setIsSyncing] = useState(false);
 
   const gridRef = useRef<DataGridRef>(null);
@@ -93,13 +92,6 @@ export default function TobeLoadedClientReport() {
 
     try {
       const data = await getTobeLoadedData(params);
-
-      // If API response has a totalProfit field, use it for accurate total
-      // if (data && typeof data === 'object' && 'totalProfit' in data) {
-      //   setTotalProfit(data.totalProfit || 0);
-      //   // Return the actual data array
-      //   return data.data || data || [];
-      // }
 
       return data;
     } catch (error) {
@@ -145,10 +137,6 @@ export default function TobeLoadedClientReport() {
       <div className='position'>{cell.data.ConsigneeName}</div>
     </div>
   );
-
-  // const cellProfitRender = (cell: DataGridTypes.ColumnCellTemplateData) => (
-  //   <span>${cell.data.TotalProfit?.toFixed(2) || '0.00'}</span>
-  // );
 
   const cellDateRender = (cell: DataGridTypes.ColumnCellTemplateData, field: string) => {
     const date = cell.data[field];
@@ -262,9 +250,6 @@ export default function TobeLoadedClientReport() {
             <Item location='before'>
               <div className='grid-header'>To Be Loaded Jobs Report</div>
             </Item>
-            {/* <Item location='after'>
-              <div className='total-profit-display'>Total Profit: ${formatCurrency(totalProfit)} &nbsp;&nbsp;&nbsp;&nbsp;</div>
-            </Item> */}
             <Item
               location='after'
               locateInMenu='auto'
