@@ -16,6 +16,7 @@ function LoginInner() {
   const [identifier, setIdentifier] = useState(''); // username or email
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { push } = useToast();
 
@@ -109,7 +110,35 @@ function LoginInner() {
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1 uppercase tracking-wide">Password</label>
-              <TextBox mode="password" value={password} onValueChanged={(e) => setPassword(e.value)} placeholder="Enter password" />
+              <div className="relative">
+                <TextBox
+                  mode={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onValueChanged={(e) => setPassword(e.value)}
+                  placeholder="Enter password"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(p => !p)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute inset-y-0 right-0 flex items-center pr-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition"
+                  tabIndex={0}
+                >
+                  {showPassword ? (
+                    // Eye off icon (simple SVG)
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7-1-10-8-10-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 1 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19M14.12 14.12A3 3 0 0 1 9.88 9.88M3 3l18 18" />
+                    </svg>
+                  ) : (
+                    // Eye icon
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
               {!passwordValid && password.length > 0 && (
                 <div className="mt-1 text-[11px] text-red-600 dark:text-red-400">Minimum 6 characters.</div>
               )}
