@@ -5,7 +5,16 @@
 import { signIn } from '@/app/api/auth';
 
 // Use the same base URL pattern as other clients to avoid env/token mismatches
-const baseUrl = `${process.env.REACT_APP_API_URL}/api/v1/clients`;
+const apiRoot = process.env.REACT_APP_API_URL;
+if (!apiRoot) {
+  console.error('[DashboardMetricsApiClient] Missing REACT_APP_API_URL environment variable. Requests will fail.');
+}
+const baseUrl = `${apiRoot}/api/v1/clients`;
+
+// Simple in-memory token cache to avoid signing in on every metric call in a single server runtime
+let cachedToken: string | undefined;
+let cachedTokenFetchedAt: number | undefined;
+const TOKEN_TTL_MS = 1000 * 60 * 10; // 10 minutes
 
 type CommonParams = {
   userId?: number;
@@ -13,11 +22,17 @@ type CommonParams = {
 
 async function getWithAuth(path: string, queryParams?: Record<string, string>, userId?: number) {
   try {
-    const signInResult = await signIn('admin@xolog.com', 'Admin@Xolog#16');
-    let token: string | undefined = undefined;
-    if (signInResult && signInResult.isOk && signInResult.data && signInResult.data.token) {
-      token = signInResult.data.token;
+    // Reuse cached token if still fresh
+    if (!cachedToken || !cachedTokenFetchedAt || Date.now() - cachedTokenFetchedAt > TOKEN_TTL_MS) {
+      const signInResult = await signIn('admin@xolog.com', 'Admin@Xolog#16');
+      if (signInResult && signInResult.isOk && signInResult.data && signInResult.data.token) {
+        cachedToken = signInResult.data.token;
+        cachedTokenFetchedAt = Date.now();
+      } else {
+        console.warn('[DashboardMetricsApiClient] Sign-in failed, proceeding without token. Result:', signInResult);
+      }
     }
+    const token = cachedToken;
 
     const qs = new URLSearchParams();
     qs.set('page', '1');
@@ -42,19 +57,29 @@ async function getWithAuth(path: string, queryParams?: Record<string, string>, u
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${baseUrl}${path}?${qs.toString()}`, {
+    const requestUrl = `${baseUrl}${path}?${qs.toString()}`;
+    const response = await fetch(requestUrl, {
       method: 'GET',
       headers,
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch ${path}`);
+      let bodyText: string | undefined;
+      try { bodyText = await response.text(); } catch { /* ignore */ }
+      console.error('[DashboardMetricsApiClient] Non-OK response', {
+        path,
+        status: response.status,
+        statusText: response.statusText,
+        url: requestUrl,
+        body: bodyText?.slice(0, 500),
+      });
+      throw new Error(`Failed to fetch ${path} (status ${response.status})`);
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('DashboardMetrics getWithAuth error', error);
+    console.error('DashboardMetrics getWithAuth error', { path, queryParams, userId, error });
     return [];
   }
 }

@@ -18,6 +18,11 @@ export interface ITobeLoadedJob extends Document {
   ShipperName?: string;
   CustomerName?: string;
   ConsigneeName?: string;
+  CustomerId: number;
+  ConsigneeId: number;
+  UserId: number;
+  SalesId: number;
+  OperatingUserId: number;
   MemberOf: string;
   Volume?: string;
   CountryOfDeparture?: string;
