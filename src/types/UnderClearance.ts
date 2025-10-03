@@ -239,7 +239,7 @@ const UnderClearanceJobSchema: Schema<IUnderClearanceJob> = new Schema(
       min: [0, "TotalProfit cannot be negative"],
     },
   },
-  { timestamps: true, collection: "underclearancejobs" }
+  { timestamps: true, collection: "underclearance" }
 );
 
 // Add indexes for better performance
